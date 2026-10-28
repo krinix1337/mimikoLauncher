@@ -1,0 +1,108 @@
+/**
+ * Material 3 Expressive look for the `m3` and `m3_light` themes.
+ *
+ * Colors come from the role palette in `packages/assets/styles/variables.scss`. This file adds the
+ * parts of M3 Expressive that are not colors: the corner radius scale, the spring-like motion
+ * curves from https://m3.material.io/styles/motion/overview/specs, pill shaped buttons that morph
+ * when pressed, and the navigation rail indicator.
+ */
+:is(html.m3-mode, html.m3_light-mode) {
+	/* Motion: web conversion of the Expressive motion physics springs. */
+	--md-spatial-fast: cubic-bezier(0.42, 1.67, 0.21, 0.9);
+	--md-spatial: cubic-bezier(0.38, 1.21, 0.22, 1);
+	--md-spatial-slow: cubic-bezier(0.39, 1.29, 0.35, 0.98);
+	--md-effects-fast: cubic-bezier(0.31, 0.94, 0.34, 1);
+	--md-effects: cubic-bezier(0.34, 0.8, 0.34, 1);
+	--md-effects-slow: cubic-bezier(0.34, 0.88, 0.34, 1);
+
+	/* Shape: the M3 corner radius scale. */
+	--md-shape-xs: 4px;
+	--md-shape-sm: 8px;
+	--md-shape-md: 12px;
+	--md-shape-lg: 16px;
+	--md-shape-lg-increased: 20px;
+	--md-shape-xl: 28px;
+	--md-shape-xl-increased: 32px;
+	--md-shape-xxl: 48px;
+	--radius-xs: var(--md-shape-xs);
+	--radius-sm: var(--md-shape-sm);
+	--radius-md: var(--md-shape-md);
+	--radius-lg: var(--md-shape-lg);
+	--radius-xl: var(--md-shape-xl);
+
+	font-family:
+		'Roboto Flex Variable', 'Roboto Flex', Roboto, 'Segoe UI Variable', system-ui, sans-serif;
+
+	.rounded-lg {
+		border-radius: var(--md-shape-md);
+	}
+
+	.rounded-xl {
+		border-radius: var(--md-shape-lg);
+	}
+
+	.rounded-2xl {
+		border-radius: var(--md-shape-xl);
+	}
+
+	.rounded-3xl {
+		border-radius: var(--md-shape-xl-increased);
+	}
+
+	/* Buttons are fully rounded and morph to a squarer shape while pressed. */
+	[data-button] {
+		border-radius: 9999px !important;
+		box-shadow: none !important;
+		transition:
+			border-radius 0.35s var(--md-spatial-fast),
+			background-color 0.2s var(--md-effects),
+			color 0.2s var(--md-effects),
+			filter 0.2s var(--md-effects),
+			box-shadow 0.2s var(--md-effects);
+
+		&:active:not(:disabled):not([aria-disabled='true']) {
+			border-radius: var(--md-shape-md) !important;
+		}
+	}
+
+	.button-frame--base {
+		background-color: var(--md-secondary-container) !important;
+		color: var(--md-on-secondary-container) !important;
+
+		& > svg {
+			color: inherit !important;
+		}
+	}
+
+	.button-frame--colored::before {
+		display: none;
+	}
+
+	.button-frame--outlined {
+		box-shadow: inset 0 0 0 1px var(--md-outline) !important;
+	}
+
+	/* Navigation rail: pill shaped active indicator. */
+	.app-grid-navbar {
+		gap: 0.75rem;
+		background-color: var(--md-surface);
+	}
+
+	.nav-button {
+		width: 3.5rem !important;
+		height: 2rem !important;
+		margin-inline: auto;
+		border-radius: var(--md-shape-lg) !important;
+
+		&::before {
+			border-radius: var(--md-shape-lg) !important;
+			transition:
+				opacity 0.2s var(--md-effects),
+				scale 0.35s var(--md-spatial-fast) !important;
+		}
+	}
+
+	.card {
+		border-radius: var(--md-shape-lg);
+	}
+}

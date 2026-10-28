@@ -441,6 +441,8 @@ pub enum Theme {
     Light,
     Oled,
     Retro,
+    M3,
+    M3Light,
     System,
 }
 
@@ -451,6 +453,8 @@ impl Theme {
             Theme::Light => "light",
             Theme::Oled => "oled",
             Theme::Retro => "retro",
+            Theme::M3 => "m3",
+            Theme::M3Light => "m3_light",
             Theme::System => "system",
         }
     }
@@ -461,6 +465,8 @@ impl Theme {
             "light" => Theme::Light,
             "oled" => Theme::Oled,
             "retro" => Theme::Retro,
+            "m3" => Theme::M3,
+            "m3_light" => Theme::M3Light,
             "system" => Theme::System,
             _ => Theme::Dark,
         }

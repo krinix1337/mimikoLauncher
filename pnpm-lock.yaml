@@ -265,6 +265,9 @@ importers:
       '@floating-ui/vue':
         specifier: ^2.0.1
         version: 2.0.1(vue@3.5.43(typescript@5.9.3))
+      '@fontsource-variable/roboto-flex':
+        specifier: ^5.3.0
+        version: 5.3.0
       '@modrinth/api-client':
         specifier: workspace:^
         version: link:../../packages/api-client
@@ -2203,6 +2206,9 @@ packages:
     resolution: {integrity: sha512-043dyEKD9TDSfz080YH2vobubgg+NIo/9Fw4RAl7sEMpD8Am1DNrrSTl/GpMBjyGHoD/FbJY2QLawY+HSQsEIA==}
     peerDependencies:
       vue: '>=3.3.0'
+
+  '@fontsource-variable/roboto-flex@5.3.0':
+    resolution: {integrity: sha512-bOxckUy0qXNRjhV6e4pcHGSvptix4ZRD1uaj5Za8h+p3qrb2GL4U4TQdpVmPSy0SmqwldfD+JJqEKdF68EyiAw==}
 
   '@formatjs/cli@6.12.2':
     resolution: {integrity: sha512-y215aarLZXei3u1WDRAiet/VajgvUXzvz4ifPENDSPXfIog0aBJKtFvIU7EWbcFWy7rstbn5GcwwQW4F1G3TJg==}
@@ -11690,6 +11696,8 @@ snapshots:
       '@floating-ui/utils': 0.2.12
       vue: 3.5.43(typescript@5.9.3)
 
+  '@fontsource-variable/roboto-flex@5.3.0': {}
+
   '@formatjs/cli@6.12.2(@vue/compiler-core@3.5.27)(vue@3.5.43(typescript@5.9.3))':
     optionalDependencies:
       '@vue/compiler-core': 3.5.27
@@ -20794,7 +20802,7 @@ snapshots:
       esbuild: 0.27.2
       fdir: 6.5.0(picomatch@4.0.7)
       picomatch: 4.0.7
-      postcss: 8.5.6
+      postcss: 8.5.8
       rollup: 4.63.6
       tinyglobby: 0.2.17
     optionalDependencies:

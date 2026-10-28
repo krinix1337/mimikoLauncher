@@ -35,6 +35,9 @@
 					"url": "https://api.mclo.gs/*"
 				},
 				{
+					"url": "https://api.github.com/repos/krinix1337/mimikoLauncher/*"
+				},
+				{
 					"url": "https://fill.papermc.io/*"
 				},
 				{

@@ -70,10 +70,12 @@ import SplashScreen from '@/components/ui/SplashScreen.vue'
 import { useCheckDisableMouseover } from '@/composables/macCssFix.js'
 import { useAppEvent } from '@/composables/use-app-event'
 import { useAppSettings } from '@/composables/use-app-settings.ts'
+import { useCrashHelper } from '@/composables/use-crash-helper'
 import { useError } from '@/composables/use-error.js'
 import { useInstanceMetadataRefresh } from '@/composables/use-instance-metadata-refresh'
 import { useQuickInstanceLimit } from '@/composables/use-quick-instance-limit.ts'
 import { isDarkTheme, useTheme } from '@/composables/use-theme.ts'
+import { useUpdateCheck } from '@/composables/use-update-check'
 import { config } from '@/config'
 import { provideMinecraftAccounts } from '@/features/minecraft-accounts/context'
 import AppSettingsModal from '@/features/settings/app-settings-modal/index.vue'
@@ -262,6 +264,12 @@ useAppEvent(
 const popupNotificationManager = new AppPopupNotificationManager()
 providePopupNotificationManager(popupNotificationManager)
 const { addPopupNotification } = popupNotificationManager
+useCrashHelper({
+	notify: addPopupNotification,
+	openLogs: (instanceId) => void router.push(`/instance/${encodeURIComponent(instanceId)}/logs`),
+	appEvents,
+})
+useUpdateCheck({ notify: addPopupNotification })
 let adsConsentPopupId = null
 useAppEvent('ads_consent_required', handleAdsConsentRequired, appEvents)
 

@@ -16,6 +16,8 @@
 	"dependencies": {
 		"@dnd-kit/dom": "^0.5.0",
 		"@dnd-kit/vue": "^0.5.0",
+		"@floating-ui/vue": "^2.0.1",
+		"@fontsource-variable/roboto-flex": "^5.3.0",
 		"@modrinth/api-client": "workspace:^",
 		"@modrinth/assets": "workspace:*",
 		"@modrinth/ui": "workspace:*",
@@ -35,7 +37,6 @@
 		"@vueuse/core": "^11.1.0",
 		"ace-builds": "^1.43.5",
 		"dayjs": "^1.11.10",
-		"@floating-ui/vue": "^2.0.1",
 		"fuse.js": "^6.6.2",
 		"intl-messageformat": "^10.7.7",
 		"motion-v": "2.2.1",

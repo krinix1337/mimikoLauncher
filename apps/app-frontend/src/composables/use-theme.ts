@@ -1,8 +1,11 @@
 import { prepareThemeColorTransition } from '@modrinth/ui'
 import { computed, reactive, ref, watch } from 'vue'
 
-export const THEME_OPTIONS = ['dark', 'light', 'oled', 'retro', 'system'] as const
-export const DARK_THEMES = ['dark', 'oled', 'retro'] as const
+export const THEME_OPTIONS = ['dark', 'light', 'oled', 'retro', 'm3', 'm3_light', 'system'] as const
+export const DARK_THEMES = ['dark', 'oled', 'retro', 'm3'] as const
+
+/** Themes that need the light color scheme and the shared `light-mode` styles. */
+const LIGHT_THEMES: readonly string[] = ['light', 'm3_light']
 
 export type ColorTheme = (typeof THEME_OPTIONS)[number]
 export type DarkTheme = (typeof DARK_THEMES)[number]
@@ -107,6 +110,9 @@ watch(
 			html.classList.remove(`${option}-mode`)
 		}
 		html.classList.add(`${theme}-mode`)
+		if (LIGHT_THEMES.includes(theme)) {
+			html.classList.add('light-mode')
+		}
 	},
 	{ immediate: true },
 )

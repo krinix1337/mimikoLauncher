@@ -433,6 +433,144 @@ html {
 	--color-gradient-button-bg: linear-gradient(180deg, #1b1b20 0%, #25262b 100%);
 }
 
+@mixin m3-roles {
+	--surface-1: var(--md-surface);
+	--surface-1-5: var(--md-surface-container-lowest);
+	--surface-2: var(--md-surface-container-low);
+	--surface-2-5: var(--md-surface-container);
+	--surface-3: var(--md-surface-container);
+	--surface-4: var(--md-surface-container-high);
+	--surface-5: var(--md-surface-container-highest);
+
+	--color-bg: var(--md-surface);
+	--color-raised-bg: var(--md-surface-container);
+	--color-super-raised-bg: var(--md-surface-container-high);
+
+	--color-button-bg: var(--md-secondary-container);
+	--color-button-border: transparent;
+	--color-scrollbar: var(--md-outline-variant);
+
+	--color-divider: var(--md-outline-variant);
+	--color-divider-dark: var(--md-outline);
+
+	--color-text-primary: var(--md-on-surface);
+	--color-text-default: var(--md-on-surface);
+	--color-text-tertiary: var(--md-on-surface-variant);
+	--color-base: var(--md-on-surface);
+	--color-secondary: var(--md-on-surface-variant);
+	--color-contrast: var(--md-on-surface);
+	--color-accent-contrast: var(--md-on-primary);
+
+	--color-brand: var(--md-primary);
+	--color-brand-highlight: color-mix(in srgb, var(--md-primary) 24%, transparent);
+	--color-brand-shadow: color-mix(in srgb, var(--md-primary) 45%, transparent);
+
+	--color-button-bg-selected: var(--md-secondary-container);
+	--color-button-text-selected: var(--md-on-secondary-container);
+
+	--brand-gradient-bg: var(--md-surface-container-low);
+	--brand-gradient-strong-bg: var(--md-surface-container);
+	--brand-gradient-button: var(--md-secondary-container);
+	--brand-gradient-border: var(--md-outline-variant);
+	--brand-gradient-fade-out-color: linear-gradient(
+		to bottom,
+		transparent,
+		var(--md-surface-container-low) 80%
+	);
+	--color-gradient-button-bg: var(--md-secondary-container);
+	--loading-bar-gradient: linear-gradient(to right, var(--md-primary), var(--md-tertiary));
+
+	--splash-tint-top: color-mix(in srgb, var(--md-primary) 22%, transparent);
+	--splash-tint-bottom: color-mix(in srgb, var(--md-tertiary) 14%, transparent);
+	--splash-overlay: color-mix(in srgb, var(--md-surface) 70%, transparent);
+
+	--shadow-inset-lg: none;
+	--shadow-inset: none;
+	--shadow-inset-sm: none;
+	--shadow-raised-lg: none;
+	--shadow-raised: none;
+	--shadow-card: none;
+	--shadow-floating: 0 4px 12px rgba(0, 0, 0, 0.18);
+
+	--hover-brightness: 1.08;
+}
+
+/** Material Design 3 baseline dark scheme, mapped onto the app tokens. */
+.m3-mode {
+	@extend .dark-mode;
+
+	--md-primary: #d0bcff;
+	--md-on-primary: #381e72;
+	--md-primary-container: #4f378b;
+	--md-on-primary-container: #eaddff;
+	--md-secondary: #ccc2dc;
+	--md-on-secondary: #332d41;
+	--md-secondary-container: #4a4458;
+	--md-on-secondary-container: #e8def8;
+	--md-tertiary: #efb8c8;
+	--md-on-tertiary: #492532;
+	--md-tertiary-container: #633b48;
+	--md-on-tertiary-container: #ffd8e4;
+	--md-error: #f2b8b5;
+	--md-on-error: #601410;
+	--md-error-container: #8c1d18;
+	--md-on-error-container: #f9dedc;
+	--md-surface: #141218;
+	--md-surface-bright: #3b383e;
+	--md-surface-container-lowest: #0f0d13;
+	--md-surface-container-low: #1d1b20;
+	--md-surface-container: #211f26;
+	--md-surface-container-high: #2b2930;
+	--md-surface-container-highest: #36343b;
+	--md-on-surface: #e6e0e9;
+	--md-on-surface-variant: #cac4d0;
+	--md-outline: #938f99;
+	--md-outline-variant: #49454f;
+	--md-inverse-surface: #e6e0e9;
+	--md-inverse-on-surface: #322f35;
+	--md-inverse-primary: #6750a4;
+
+	@include m3-roles;
+}
+
+/** Material Design 3 baseline light scheme, mapped onto the app tokens. */
+.m3_light-mode {
+	@extend .light-properties;
+
+	--md-primary: #6750a4;
+	--md-on-primary: #ffffff;
+	--md-primary-container: #eaddff;
+	--md-on-primary-container: #21005d;
+	--md-secondary: #625b71;
+	--md-on-secondary: #ffffff;
+	--md-secondary-container: #e8def8;
+	--md-on-secondary-container: #1d192b;
+	--md-tertiary: #7d5260;
+	--md-on-tertiary: #ffffff;
+	--md-tertiary-container: #ffd8e4;
+	--md-on-tertiary-container: #31111d;
+	--md-error: #b3261e;
+	--md-on-error: #ffffff;
+	--md-error-container: #f9dedc;
+	--md-on-error-container: #410e0b;
+	--md-surface: #fef7ff;
+	--md-surface-bright: #fef7ff;
+	--md-surface-container-lowest: #ffffff;
+	--md-surface-container-low: #f7f2fa;
+	--md-surface-container: #f3edf7;
+	--md-surface-container-high: #ece6f0;
+	--md-surface-container-highest: #e6e0e9;
+	--md-on-surface: #1d1b20;
+	--md-on-surface-variant: #49454f;
+	--md-outline: #79747e;
+	--md-outline-variant: #cac4d0;
+	--md-inverse-surface: #322f35;
+	--md-inverse-on-surface: #f5eff7;
+	--md-inverse-primary: #d0bcff;
+
+	@include m3-roles;
+}
+
 .retro-mode {
 	@extend .dark-mode;
 	--surface-1: #191917;

@@ -1,4 +1,6 @@
+import '@fontsource-variable/roboto-flex'
 import 'overlayscrollbars/overlayscrollbars.css'
+import '@/assets/stylesheets/m3-expressive.scss'
 
 import { installTooltipDirective } from '@modrinth/ui'
 import { VueQueryPlugin } from '@tanstack/vue-query'

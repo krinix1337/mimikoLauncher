@@ -38,6 +38,14 @@ const themeLabels = defineMessages({
 		id: 'settings.display.theme.retro',
 		defaultMessage: 'Retro',
 	},
+	m3: {
+		id: 'settings.display.theme.m3',
+		defaultMessage: 'Material 3 Expressive',
+	},
+	m3_light: {
+		id: 'settings.display.theme.m3-light',
+		defaultMessage: 'Material 3 Expressive (light)',
+	},
 })
 
 const themeTooltips = defineMessages({
@@ -126,6 +134,14 @@ function getPreviewClass(option: T): string {
 
 		&.retro-mode {
 			@extend .retro-mode;
+		}
+
+		&.m3-mode {
+			@extend .m3-mode;
+		}
+
+		&.m3_light-mode {
+			@extend .m3_light-mode;
 		}
 	}
 

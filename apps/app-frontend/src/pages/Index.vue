@@ -8,6 +8,7 @@ import { onBeforeRouteLeave } from 'vue-router'
 
 import LibrarySection from '@/components/ui/library/index.vue'
 import { libraryScrollTop } from '@/components/ui/library/view-state'
+import ServerQuickJoin from '@/components/ui/ServerQuickJoin.vue'
 import WelcomeScreen from '@/components/ui/WelcomeScreen.vue'
 import RecentWorldsList from '@/components/ui/world/RecentWorldsList.vue'
 import { useAppSettings } from '@/composables/use-app-settings.ts'
@@ -96,6 +97,7 @@ function openPageContextMenu(event: MouseEvent) {
 		class="flex flex-col gap-3 p-6"
 		@contextmenu="openPageContextMenu"
 	>
+		<ServerQuickJoin v-if="instances.length > 0" :instances="instances" />
 		<RecentWorldsList
 			v-if="recentInstances?.length > 0 && appSettings.showJumpIn"
 			:recent-instances="recentInstances"

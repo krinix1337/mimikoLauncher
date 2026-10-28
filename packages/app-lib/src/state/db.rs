@@ -33,6 +33,76 @@ async fn connect_app_db(db_path: &Path) -> crate::Result<Pool<Sqlite>> {
     open_migrated_app_db(db_path).await
 }
 
+/// How many rolling copies of the app database are kept.
+const ROLLING_BACKUPS_KEPT: usize = 5;
+
+/// Minimum time between two rolling copies, so restarts in quick succession
+/// do not push out the older, possibly better, copies.
+const ROLLING_BACKUP_INTERVAL: Duration = Duration::from_secs(10 * 60);
+
+/// Copies the app database into a `backups` folder next to it, but only while
+/// it holds user data, so an empty database never replaces a good copy.
+async fn rolling_backup(pool: &Pool<Sqlite>, db_path: &Path) {
+    let has_data = sqlx::query_scalar::<_, i64>(
+        "SELECT (SELECT COUNT(*) FROM instances) + (SELECT COUNT(*) FROM minecraft_users)",
+    )
+    .fetch_one(pool)
+    .await
+    .is_ok_and(|count| count > 0);
+    if !has_data {
+        return;
+    }
+
+    let Some(backup_dir) = db_path.parent().map(|dir| dir.join("backups"))
+    else {
+        return;
+    };
+    if let Err(err) = std::fs::create_dir_all(&backup_dir) {
+        tracing::warn!("Failed to create the database backup folder: {err}");
+        return;
+    }
+
+    let newest_is_recent = list_rolling_backups(&backup_dir)
+        .last()
+        .and_then(|entry| entry.metadata().ok()?.modified().ok())
+        .and_then(|modified| modified.elapsed().ok())
+        .is_some_and(|age| age < ROLLING_BACKUP_INTERVAL);
+    if newest_is_recent {
+        return;
+    }
+
+    let backup_path = backup_dir.join(format!(
+        "app-{}.db",
+        chrono::Utc::now().format("%Y%m%d-%H%M%S")
+    ));
+    if let Err(err) = sqlx::query("VACUUM INTO ?")
+        .bind(backup_path.to_string_lossy().to_string())
+        .execute(pool)
+        .await
+    {
+        tracing::warn!("Failed to back up the app database: {err}");
+        return;
+    }
+
+    let backups = list_rolling_backups(&backup_dir);
+    let excess = backups.len().saturating_sub(ROLLING_BACKUPS_KEPT);
+    for old in backups.into_iter().take(excess) {
+        let _ = std::fs::remove_file(old.path());
+    }
+}
+
+/// Lists the rolling backups in a folder, oldest first.
+fn list_rolling_backups(backup_dir: &Path) -> Vec<std::fs::DirEntry> {
+    let mut backups: Vec<_> = std::fs::read_dir(backup_dir)
+        .into_iter()
+        .flatten()
+        .flatten()
+        .filter(|entry| entry.file_name().to_string_lossy().starts_with("app-"))
+        .collect();
+    backups.sort_by_key(|entry| entry.file_name());
+    backups
+}
+
 async fn open_migrated_app_db(db_path: &Path) -> crate::Result<Pool<Sqlite>> {
     let pool = open_app_db_pool(db_path).await?;
 
@@ -44,6 +114,7 @@ async fn open_migrated_app_db(db_path: &Path) -> crate::Result<Pool<Sqlite>> {
 
     sqlx::migrate!().run(&pool).await?;
     record_current_app_version(&pool).await?;
+    rolling_backup(&pool, db_path).await;
 
     if let Err(err) = stale_data_cleanup(&pool).await {
         tracing::warn!(
