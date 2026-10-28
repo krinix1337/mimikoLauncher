@@ -21,10 +21,9 @@
 
 		<div class="flex flex-col gap-6 px-6 pb-6">
 			<div class="flex gap-2">
-				<input
+				<Input
 					v-model="offlineName"
-					type="text"
-					maxlength="16"
+					:maxlength="16"
 					class="grow"
 					:placeholder="formatMessage(messages.nicknamePlaceholder)"
 					@keydown.enter="playOffline"
@@ -65,7 +64,14 @@
 
 <script setup lang="ts">
 import { SpinnerIcon } from '@modrinth/assets'
-import { Button, defineMessages, injectNotificationManager, NewModal, useVIntl } from '@modrinth/ui'
+import {
+	Button,
+	defineMessages,
+	injectNotificationManager,
+	Input,
+	NewModal,
+	useVIntl,
+} from '@modrinth/ui'
 import { ref } from 'vue'
 
 import steveImage from '@/assets/steve-look-up-left.webp'

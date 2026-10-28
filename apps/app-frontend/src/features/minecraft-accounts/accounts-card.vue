@@ -4,10 +4,9 @@
 		class="flex flex-col gap-3 bg-button-bg border border-solid border-surface-5 rounded-xl p-3 mt-2"
 	>
 		<span>{{ formatMessage(messages.notSignedIn) }}</span>
-		<input
+		<Input
 			v-model="offlineName"
-			type="text"
-			maxlength="16"
+			:maxlength="16"
 			:placeholder="formatMessage(messages.nicknamePlaceholder)"
 			@keydown.enter="loginOffline()"
 		/>
@@ -81,10 +80,9 @@
 				</div>
 			</template>
 			<div class="flex flex-col gap-2 px-2 pt-2">
-				<input
+				<Input
 					v-model="offlineName"
-					type="text"
-					maxlength="16"
+					:maxlength="16"
 					:placeholder="formatMessage(messages.nicknamePlaceholder)"
 					@keydown.enter="loginOffline()"
 				/>
@@ -126,6 +124,7 @@ import {
 	defineMessages,
 	IconButton,
 	injectNotificationManager,
+	Input,
 	useVIntl,
 } from '@modrinth/ui'
 import type { Ref } from 'vue'
