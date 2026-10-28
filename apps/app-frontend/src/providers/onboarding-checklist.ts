@@ -30,7 +30,13 @@ export function setupOnboardingChecklistProvider(
 		hasLoggedIntoMinecraft: computed(() => checklist.value?.has_logged_into_minecraft ?? false),
 		hasLoggedIntoModrinth: computed(() => checklist.value?.has_logged_into_modrinth ?? false),
 		isReady: computed(() => checklist.value !== undefined),
-		showChecklist: computed(() => checklist.value?.show_checklist ?? false),
+		// mimikoLauncher: there is no Modrinth sign-in step, so hide the checklist
+		// once the remaining steps are done
+		showChecklist: computed(
+			() =>
+				(checklist.value?.show_checklist ?? false) &&
+				!(checklist.value?.has_created_instance && checklist.value?.has_logged_into_minecraft),
+		),
 	}
 
 	provideOnboardingChecklist(context)

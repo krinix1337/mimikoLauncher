@@ -498,17 +498,8 @@ const renderMode = computed<'scroll' | 'fixed'>(() =>
 )
 const isFixedRender = computed(() => renderMode.value === 'fixed')
 const currentUserCanUseSharedInstances = sharedInstanceState.currentUserCanUseSharedInstances
-const showShareTab = computed(() => {
-	const linkType = instance.value?.link?.type
-
-	return (
-		currentUserCanUseSharedInstances.value &&
-		!instance.value?.quarantined &&
-		instance.value?.shared_instance?.role !== 'member' &&
-		linkType !== 'server_project' &&
-		linkType !== 'server_project_modpack'
-	)
-})
+// mimikoLauncher: shared instances need a Modrinth account
+const showShareTab = computed(() => false)
 
 const tabs = computed(() => {
 	const instanceTabs = [

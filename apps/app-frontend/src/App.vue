@@ -5,15 +5,12 @@ import {
 	ArrowLeftRightIcon,
 	CompassIcon,
 	ImageIcon,
-	LogInIcon,
 	LogOutIcon,
 	PlayIcon,
 	PlusIcon,
 	RefreshCwIcon,
-	ServerStackIcon,
 	SettingsIcon,
 	ShirtIcon,
-	SpinnerIcon,
 	ToggleRightIcon,
 	UserIcon,
 	UserPlusIcon,
@@ -22,7 +19,6 @@ import {
 import {
 	AccountSwitchOverlay,
 	Admonition,
-	Avatar,
 	commonMessages,
 	commonSettingsMessages,
 	ContentInstallModal,
@@ -41,12 +37,10 @@ import {
 	provideNotificationManager,
 	providePageContext,
 	providePopupNotificationManager,
-	TeleportOverflowMenu,
 	TooltipDirective,
 	useDebugLogger,
 	useFormatBytes,
 	useHostingIntercom,
-	UserRoleIcon,
 	useVIntl,
 } from '@modrinth/ui'
 import { renderString } from '@modrinth/utils/parse'
@@ -81,7 +75,6 @@ import NavButton from '@/components/ui/NavButton.vue'
 import QuickInstanceSwitcher from '@/components/ui/QuickInstanceSwitcher.vue'
 import SharedInstanceInviteHandler from '@/components/ui/shared-instances/shared-instance-invite-handler/index.vue'
 import SplashScreen from '@/components/ui/SplashScreen.vue'
-import SurveyPopup from '@/components/ui/SurveyPopup.vue'
 import { useCheckDisableMouseover } from '@/composables/macCssFix.js'
 import { useAppEvent } from '@/composables/use-app-event'
 import { useAppSettings } from '@/composables/use-app-settings.ts'
@@ -2049,18 +2042,6 @@ provideAppUpdateDownloadProgress(appUpdateDownload)
 			>
 				<ImageIcon />
 			</NavButton>
-			<NavButton
-				v-tooltip.right="formatMessage(messages.modrinthHosting)"
-				to="/hosting/manage"
-				:is-primary="(r) => r.path === '/hosting/manage' || r.path === '/hosting/manage/'"
-				:is-subpage="
-					(r) =>
-						(r.path.startsWith('/hosting/manage/') && r.path !== '/hosting/manage/') ||
-						((r.path.startsWith('/browse') || r.path.startsWith('/project')) && r.query.sid)
-				"
-			>
-				<ServerStackIcon />
-			</NavButton>
 			<suspense>
 				<QuickInstanceSwitcher>
 					<NavButton
@@ -2077,70 +2058,6 @@ provideAppUpdateDownloadProgress(appUpdateDownload)
 				:to="settingsActions.openSettings"
 			>
 				<SettingsIcon />
-			</NavButton>
-			<IconButton
-				v-if="credentials === undefined"
-				v-tooltip.right="profileButtonTooltip"
-				type="quiet"
-				size="xl"
-				disabled
-				class="pointer-events-none"
-				:label="formatMessage(messages.loadingProfile)"
-			>
-				<SpinnerIcon class="animate-spin" />
-			</IconButton>
-			<TeleportOverflowMenu
-				v-else-if="credentials?.user"
-				v-tooltip.right="profileButtonTooltip"
-				type="quiet"
-				size="xl"
-				:label="formatMessage(messages.modrinthAccount)"
-				:options="modrinthAccountMenuOptions"
-				placement="right-end"
-				:distance="4"
-				class="brightness-100 hover:!brightness-100 focus-visible:!brightness-100"
-			>
-				<Avatar
-					:src="credentials?.user?.avatar_url"
-					alt=""
-					size="32px"
-					circle
-					no-shadow
-					class="pointer-events-none !size-8"
-				/>
-				<template
-					v-for="account in accountSwitcherAccounts"
-					:key="account.user_id"
-					#[account.optionId]
-				>
-					<Avatar :src="account.user.avatar_url" size="1.25rem" aria-hidden="true" circle />
-					{{ account.user.username }}
-					<UserRoleIcon :role="account.user.role" />
-				</template>
-			</TeleportOverflowMenu>
-			<TeleportOverflowMenu
-				v-else-if="accountSwitcherAccounts.length > 0"
-				v-tooltip.right="profileButtonTooltip"
-				type="quiet"
-				size="xl"
-				:label="formatMessage(messages.signInToModrinthAccount)"
-				:options="accountSwitcherOptions"
-				placement="right-end"
-				:distance="4"
-			>
-				<LogInIcon class="!text-brand" />
-				<template
-					v-for="account in accountSwitcherAccounts"
-					:key="account.user_id"
-					#[account.optionId]
-				>
-					<Avatar :src="account.user.avatar_url" size="1.25rem" aria-hidden="true" circle />
-					{{ account.user.username }}
-					<UserRoleIcon :role="account.user.role" />
-				</template>
-			</TeleportOverflowMenu>
-			<NavButton v-else v-tooltip.right="profileButtonTooltip" :to="() => requestSignIn()">
-				<LogInIcon class="text-brand" />
 			</NavButton>
 		</div>
 		<AppTitleBar
@@ -2160,7 +2077,6 @@ provideAppUpdateDownloadProgress(appUpdateDownload)
 		}"
 	>
 		<div class="app-viewport flex-grow router-view">
-			<SurveyPopup />
 			<div
 				class="loading-indicator-container h-8 fixed z-50 pointer-events-none"
 				:style="{
