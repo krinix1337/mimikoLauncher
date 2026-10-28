@@ -19,22 +19,34 @@
 			</div>
 		</div>
 
-		<div class="flex flex-col gap-6 px-6 pb-6">
-			<div class="flex gap-2">
-				<Input
-					v-model="offlineName"
-					:maxlength="16"
-					class="grow"
-					:placeholder="formatMessage(messages.nicknamePlaceholder)"
-					@keydown.enter="playOffline"
-				/>
-				<Button type="colored" color="brand" :disabled="loadingSignIn" @click="playOffline">
-					{{ formatMessage(messages.playOffline) }}
-				</Button>
+		<div class="flex flex-col gap-4 px-6 pb-6">
+			<div class="flex flex-col gap-2">
+				<span class="font-semibold text-contrast">{{ formatMessage(messages.offlineTitle) }}</span>
+				<div class="flex gap-2">
+					<Input
+						v-model="offlineName"
+						:maxlength="16"
+						class="grow"
+						:placeholder="formatMessage(messages.nicknamePlaceholder)"
+						@keydown.enter="playOffline"
+					/>
+					<Button type="colored" color="brand" :disabled="loading" @click="playOffline">
+						{{ formatMessage(messages.playOffline) }}
+					</Button>
+				</div>
 			</div>
-			<div class="grid grid-cols-1 gap-2">
-				<Button :disabled="loadingSignIn" @click="signIn">
-					<SpinnerIcon v-if="loadingSignIn" class="animate-spin" />
+
+			<div class="flex flex-col gap-2">
+				<span class="font-semibold text-contrast">{{ formatMessage(messages.elybyTitle) }}</span>
+				<ElybyLoginForm :disabled="loading" @logged-in="onLoggedIn" />
+			</div>
+
+			<div class="flex flex-col gap-2">
+				<span class="font-semibold text-contrast">{{
+					formatMessage(messages.microsoftTitle)
+				}}</span>
+				<Button :disabled="loading" @click="signIn">
+					<SpinnerIcon v-if="loadingMicrosoft" class="animate-spin" />
 					<svg
 						v-else
 						width="20"
@@ -72,11 +84,12 @@ import {
 	NewModal,
 	useVIntl,
 } from '@modrinth/ui'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
 import steveImage from '@/assets/steve-look-up-left.webp'
 import { handleSevereError } from '@/composables/use-error.js'
 import { injectMinecraftAccounts } from '@/features/minecraft-accounts/context'
+import ElybyLoginForm from '@/features/minecraft-accounts/elyby-login-form.vue'
 import { trackEvent } from '@/helpers/analytics'
 import { login as loginFlow, login_offline, set_default_user } from '@/helpers/auth.js'
 
@@ -86,17 +99,28 @@ const minecraftAccounts = injectMinecraftAccounts()
 
 const messages = defineMessages({
 	header: {
-		id: 'minecraft-required.offline.header',
-		defaultMessage: 'Нужен ник',
+		id: 'minecraft-required.mimiko.header',
+		defaultMessage: 'Вход в игру',
 	},
 	descriptionHeader: {
-		id: 'minecraft-required.offline.description-header',
-		defaultMessage: 'Введи ник, чтобы играть',
+		id: 'minecraft-required.mimiko.description-header',
+		defaultMessage: 'Выбери, как играть',
 	},
 	description: {
-		id: 'minecraft-required.offline.description',
-		defaultMessage:
-			'Аккаунт не нужен: играй по нику. Если у тебя есть лицензия, можно войти через Microsoft.',
+		id: 'minecraft-required.mimiko.description',
+		defaultMessage: 'Лицензия не нужна: играй по нику или войди через Ely.by со своим скином.',
+	},
+	offlineTitle: {
+		id: 'minecraft-required.mimiko.offline-title',
+		defaultMessage: 'По нику',
+	},
+	elybyTitle: {
+		id: 'minecraft-required.mimiko.elyby-title',
+		defaultMessage: 'Ely.by',
+	},
+	microsoftTitle: {
+		id: 'minecraft-required.mimiko.microsoft-title',
+		defaultMessage: 'Лицензия Microsoft',
 	},
 	nicknamePlaceholder: {
 		id: 'minecraft-account.offline.nickname-placeholder',
@@ -113,23 +137,29 @@ const messages = defineMessages({
 })
 
 const modal = ref<InstanceType<typeof NewModal>>()
-const loadingSignIn = ref(false)
+const loadingOffline = ref(false)
+const loadingMicrosoft = ref(false)
+const loading = computed(() => loadingOffline.value || loadingMicrosoft.value)
 const offlineName = ref('')
+
+async function onLoggedIn(credentials: { profile: { id: string } }) {
+	await set_default_user(credentials.profile.id)
+	await minecraftAccounts.value?.refreshValues()
+	modal.value?.hide()
+}
 
 async function playOffline() {
 	if (!offlineName.value.trim()) return
-	loadingSignIn.value = true
+	loadingOffline.value = true
 
 	try {
 		const loggedIn = await login_offline(offlineName.value)
-		await set_default_user(loggedIn.profile.id)
-		await minecraftAccounts.value?.refreshValues()
 		offlineName.value = ''
-		modal.value?.hide()
+		await onLoggedIn(loggedIn)
 	} catch (error) {
 		handleError(error)
 	} finally {
-		loadingSignIn.value = false
+		loadingOffline.value = false
 	}
 }
 
@@ -138,20 +168,18 @@ function show() {
 }
 
 async function signIn() {
-	loadingSignIn.value = true
+	loadingMicrosoft.value = true
 
 	try {
 		const loggedIn = await loginFlow()
 		if (!loggedIn) return
 
-		await set_default_user(loggedIn.profile.id)
-		await minecraftAccounts.value?.refreshValues()
+		await onLoggedIn(loggedIn)
 		await trackEvent('AccountLogIn', { source: 'MinecraftRequiredModal' })
-		modal.value?.hide()
 	} catch (error) {
 		handleSevereError(error)
 	} finally {
-		loadingSignIn.value = false
+		loadingMicrosoft.value = false
 	}
 }
 

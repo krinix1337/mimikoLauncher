@@ -2,15 +2,17 @@
 import {
 	CheckIcon,
 	EditIcon,
+	ExternalIcon,
 	EyeIcon,
 	InfoIcon,
+	LogInIcon,
 	RotateCounterClockwiseIcon,
 	ShirtIcon,
 	SpinnerIcon,
-	WindowsIcon,
 } from '@modrinth/assets'
 import {
 	Button,
+	ButtonLink,
 	commonMessages,
 	ConfirmModal,
 	defineMessages,
@@ -31,10 +33,15 @@ import EarsModIcon from '@/assets/skins/ears-mod.png'
 import EditSkinModal from '@/components/ui/skin/EditSkinModal.vue'
 import VirtualSkinSectionList from '@/components/ui/skin/VirtualSkinSectionList.vue'
 import { useAppSettings } from '@/composables/use-app-settings.ts'
-import { handleSevereError } from '@/composables/use-error.js'
+import { useError } from '@/composables/use-error.js'
 import { injectMinecraftAccounts } from '@/features/minecraft-accounts/context'
-import { trackEvent } from '@/helpers/analytics'
-import { check_reachable, get_default_user, login as login_flow, users } from '@/helpers/auth'
+import {
+	check_reachable,
+	get_default_user,
+	get_elyby_skin,
+	isNonMicrosoftAccount,
+	users,
+} from '@/helpers/auth'
 import { cleanupUnusedPreviews } from '@/helpers/rendering/skin-previews'
 import type { Cape, Skin, SkinTextureUrl } from '@/helpers/skins.ts'
 import {
@@ -211,6 +218,22 @@ const messages = defineMessages({
 		id: 'app.skins.sign-in.button',
 		defaultMessage: 'Sign in to Microsoft',
 	},
+	mimikoSignInButton: {
+		id: 'app.skins.mimiko.sign-in.button',
+		defaultMessage: 'Войти',
+	},
+	elybySkinHint: {
+		id: 'app.skins.mimiko.elyby-hint',
+		defaultMessage: 'Скин берётся с Ely.by. Чтобы сменить его, загрузи новый скин на Ely.by.',
+	},
+	elybyNoSkinHint: {
+		id: 'app.skins.mimiko.elyby-no-skin',
+		defaultMessage: 'На Ely.by нет скина для этого ника. Загрузи его на Ely.by, и он появится здесь и в игре.',
+	},
+	elybyChangeSkin: {
+		id: 'app.skins.mimiko.elyby-change',
+		defaultMessage: 'Сменить скин на Ely.by',
+	},
 })
 
 const editSkinModal = useTemplateRef('editSkinModal')
@@ -343,6 +366,23 @@ const skinTexture = computedAsync(async () => {
 		return ''
 	}
 })
+// Nickname and Ely.by accounts use the skin set on Ely.by instead of the Mojang profile
+const isElybySkinAccount = computed(() => isNonMicrosoftAccount(currentUser.value))
+const elybySkin = computedAsync(async () => {
+	if (!isElybySkinAccount.value || !username.value) return null
+	try {
+		return await get_elyby_skin(username.value)
+	} catch (error) {
+		handleError(error as Error)
+		return null
+	}
+}, null)
+const previewTexture = computed(() =>
+	isElybySkinAccount.value ? (elybySkin.value?.texture ?? '') : (skinTexture.value ?? ''),
+)
+const previewVariant = computed(() =>
+	isElybySkinAccount.value ? (elybySkin.value?.slim ? 'SLIM' : 'CLASSIC') : skinVariant.value,
+)
 const capeTexture = computed(() => currentCape.value?.texture)
 const skinVariant = computed(() => selectedSkin.value?.variant)
 const skinNametag = computed(() => (appSettings.hideNametagSkinsPage ? undefined : username.value))
@@ -828,16 +868,9 @@ async function loadCurrentUser() {
 	}
 }
 
-async function login() {
-	minecraftAccounts.value?.setLoginDisabled(true)
-	const loggedIn = await login_flow().catch(handleSevereError)
-
-	if (loggedIn && minecraftAccounts.value) {
-		await minecraftAccounts.value.refreshValues()
-	}
-
-	trackEvent('AccountLogIn')
-	minecraftAccounts.value?.setLoginDisabled(false)
+// Opens the shared sign-in modal (nickname, Ely.by or Microsoft)
+function login() {
+	useError().minecraftRequiredModal?.show()
 }
 
 function openAddSkinFileBrowser() {
@@ -1108,16 +1141,16 @@ await loadSkins()
 				class="ml-5 mt-4 flex h-[calc(80vh-1rem)] items-center justify-center max-[700px]:h-[calc(50vh-1rem)]"
 			>
 				<SkinPreviewRenderer
-					:cape-src="capeTexture"
-					:texture-src="skinTexture || ''"
-					:ears-texture-src="selectedSkin?.texture"
-					:variant="skinVariant"
+					:cape-src="isElybySkinAccount ? undefined : capeTexture"
+					:texture-src="previewTexture"
+					:ears-texture-src="isElybySkinAccount ? undefined : selectedSkin?.texture"
+					:variant="previewVariant"
 					:nametag="skinNametag"
 					:initial-rotation="Math.PI / 8"
 					:ears-enabled="earsFeaturesEnabled"
 					@ears-features-detected="selectedSkinHasEarsFeatures = $event"
 				>
-					<template v-if="hasPendingSkinChange" #nametag-badge>
+					<template v-if="hasPendingSkinChange && !isElybySkinAccount" #nametag-badge>
 						<div
 							class="flex items-center justify-center gap-1.5 rounded-full border border-solid border-brand-blue bg-bg-blue px-3 py-1 text-base font-semibold leading-6 text-brand-blue"
 						>
@@ -1126,7 +1159,19 @@ await loadSkins()
 						</div>
 					</template>
 					<template #subtitle>
+						<div v-if="isElybySkinAccount" class="flex w-full flex-col items-center gap-3">
+							<p class="m-0 max-w-[340px] text-center text-secondary">
+								{{
+									formatMessage(elybySkin ? messages.elybySkinHint : messages.elybyNoSkinHint)
+								}}
+							</p>
+							<ButtonLink href="https://ely.by" size="lg">
+								<ExternalIcon />
+								{{ formatMessage(messages.elybyChangeSkin) }}
+							</ButtonLink>
+						</div>
 						<div
+							v-else
 							class="skin-preview-subtitle flex w-full flex-col items-center gap-6"
 							:class="{ 'has-ears-features': selectedSkinHasEarsFeatures }"
 						>
@@ -1255,7 +1300,7 @@ await loadSkins()
 			</div>
 		</div>
 
-		<div class="pt-2">
+		<div v-if="!isElybySkinAccount" class="pt-2">
 			<VirtualSkinSectionList
 				ref="skinSectionList"
 				:saved-skins="savedSkins"
@@ -1293,16 +1338,9 @@ await loadSkins()
 					</p>
 				</div>
 			</div>
-			<Button
-				v-show="minecraftAccounts"
-				type="colored"
-				color="brand"
-				:disabled="minecraftAccounts?.loginDisabled"
-				@click="login"
-			>
-				<SpinnerIcon v-if="minecraftAccounts?.loginDisabled" class="animate-spin" />
-				<WindowsIcon v-else />
-				{{ formatMessage(messages.signInButton) }}
+			<Button type="colored" color="brand" @click="login">
+				<LogInIcon />
+				{{ formatMessage(messages.mimikoSignInButton) }}
 			</Button>
 		</div>
 	</div>

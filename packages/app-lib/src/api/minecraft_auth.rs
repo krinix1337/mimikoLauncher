@@ -67,6 +67,16 @@ pub async fn login_offline(username: &str) -> crate::Result<Credentials> {
     Ok(credentials)
 }
 
+pub use crate::state::ElybySkin;
+
+/// Gets the Ely.by skin of a player name, if they have one
+#[tracing::instrument]
+pub async fn get_elyby_skin(
+    username: &str,
+) -> crate::Result<Option<ElybySkin>> {
+    crate::state::fetch_elyby_skin(username).await
+}
+
 /// Signs into an Ely.by account and makes it the active one
 #[tracing::instrument(skip(password))]
 pub async fn login_elyby(

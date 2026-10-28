@@ -4,14 +4,16 @@
 
 use std::path::PathBuf;
 
+use base64::Engine;
+use base64::prelude::BASE64_STANDARD;
 use chrono::{Duration, Utc};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::json;
 use uuid::Uuid;
 
 use crate::ErrorKind;
 use crate::state::{Credentials, DirectoryInfo, MinecraftProfile};
-use crate::util::fetch::REQWEST_CLIENT;
+use crate::util::fetch::{INSECURE_REQWEST_CLIENT, REQWEST_CLIENT};
 
 const AUTH_SERVER: &str = "https://authserver.ely.by/auth";
 const AUTHLIB_INJECTOR_LATEST: &str =
@@ -173,6 +175,74 @@ impl Credentials {
 
         Ok(())
     }
+}
+
+const SKIN_SYSTEM: &str = "https://skinsystem.ely.by/textures";
+
+/// A player's skin as served by the Ely.by skin system.
+#[derive(Serialize)]
+pub struct ElybySkin {
+    /// The skin texture as a `data:image/png;base64,...` URL, so the frontend
+    /// can use it without running into CORS restrictions.
+    pub texture: String,
+    pub slim: bool,
+}
+
+#[derive(Deserialize)]
+struct SkinTextures {
+    #[serde(rename = "SKIN")]
+    skin: Option<SkinTexture>,
+}
+
+#[derive(Deserialize)]
+struct SkinTexture {
+    url: String,
+    metadata: Option<SkinMetadata>,
+}
+
+#[derive(Deserialize)]
+struct SkinMetadata {
+    model: Option<String>,
+}
+
+/// Fetches the Ely.by skin for a player name, if they have one.
+pub async fn fetch_elyby_skin(
+    username: &str,
+) -> crate::Result<Option<ElybySkin>> {
+    let response = INSECURE_REQWEST_CLIENT
+        .get(format!("{SKIN_SYSTEM}/{username}"))
+        .send()
+        .await?;
+    if response.status() != reqwest::StatusCode::OK {
+        return Ok(None);
+    }
+
+    let Ok(textures) = response.json::<SkinTextures>().await else {
+        return Ok(None);
+    };
+    let Some(skin) = textures.skin else {
+        return Ok(None);
+    };
+
+    let url = skin.url.replacen("http://", "https://", 1);
+    let bytes = INSECURE_REQWEST_CLIENT
+        .get(url)
+        .send()
+        .await?
+        .error_for_status()?
+        .bytes()
+        .await?;
+
+    Ok(Some(ElybySkin {
+        texture: format!(
+            "data:image/png;base64,{}",
+            BASE64_STANDARD.encode(&bytes)
+        ),
+        slim: skin
+            .metadata
+            .and_then(|metadata| metadata.model)
+            .is_some_and(|model| model == "slim"),
+    }))
 }
 
 #[derive(Deserialize)]

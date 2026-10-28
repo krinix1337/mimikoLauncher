@@ -4,20 +4,9 @@
 		class="flex flex-col gap-3 bg-button-bg border border-solid border-surface-5 rounded-xl p-3 mt-2"
 	>
 		<span>{{ formatMessage(messages.notSignedIn) }}</span>
-		<Input
-			v-model="offlineName"
-			:maxlength="16"
-			:placeholder="formatMessage(messages.nicknamePlaceholder)"
-			@keydown.enter="loginOffline()"
-		/>
-		<Button type="colored" color="brand" :disabled="loginDisabled" @click="loginOffline()">
-			<LogInIcon v-if="!loginDisabled" />
-			<SpinnerIcon v-else class="animate-spin" />
-			{{ formatMessage(messages.playOffline) }}
-		</Button>
-		<ElybyLoginForm :disabled="loginDisabled" @logged-in="setAccount" />
-		<Button :disabled="loginDisabled" @click="login()">
-			{{ formatMessage(messages.signInToMinecraft) }}
+		<Button type="colored" color="brand" @click="login()">
+			<LogInIcon />
+			{{ formatMessage(messages.signIn) }}
 		</Button>
 	</div>
 	<Accordion
@@ -81,25 +70,8 @@
 				</div>
 			</template>
 			<div class="flex flex-col gap-2 px-2 pt-2">
-				<Input
-					v-model="offlineName"
-					:maxlength="16"
-					:placeholder="formatMessage(messages.nicknamePlaceholder)"
-					@keydown.enter="loginOffline()"
-				/>
 				<Button
 					class="w-full !bg-button-bg !text-primary ![box-shadow:var(--shadow-button)]"
-					:disabled="loginDisabled"
-					@click="loginOffline()"
-				>
-					<PlusIcon />
-					{{ formatMessage(messages.addOfflineAccount) }}
-				</Button>
-				<ElybyLoginForm :disabled="loginDisabled" @logged-in="setAccount" />
-				<Button
-					v-if="accounts.length > 0"
-					class="w-full !bg-button-bg !text-primary ![box-shadow:var(--shadow-button)]"
-					:disabled="loginDisabled"
 					@click="login()"
 				>
 					<PlusIcon />
@@ -116,7 +88,6 @@ import {
 	PlusIcon,
 	RadioButtonCheckedIcon,
 	RadioButtonIcon,
-	SpinnerIcon,
 	TrashIcon,
 } from '@modrinth/assets'
 import {
@@ -126,26 +97,23 @@ import {
 	defineMessages,
 	IconButton,
 	injectNotificationManager,
-	Input,
 	useVIntl,
 } from '@modrinth/ui'
 import type { Ref } from 'vue'
 import { computed, onUnmounted, ref } from 'vue'
 
 import { useAppEvent } from '@/composables/use-app-event'
-import { handleSevereError } from '@/composables/use-error.js'
+import { useError } from '@/composables/use-error.js'
 import { trackEvent } from '@/helpers/analytics'
 import {
 	get_default_user,
-	login as login_flow,
-	login_offline,
+	get_elyby_skin,
+	isNonMicrosoftAccount,
 	remove_user,
 	set_default_user,
 	users,
 } from '@/helpers/auth'
-import { getPlayerHeadUrl } from '@/helpers/rendering/player-head'
-
-import ElybyLoginForm from './elyby-login-form.vue'
+import { generatePlayerHeadBlob, getPlayerHeadUrl } from '@/helpers/rendering/player-head'
 import type { Skin } from '@/helpers/skins'
 import { get_available_skins } from '@/helpers/skins'
 
@@ -161,12 +129,29 @@ type MinecraftCredential = {
 		id: string
 		name: string
 	}
+	refresh_token?: string
 }
 
 const accounts: Ref<MinecraftCredential[]> = ref([])
 const loginDisabled = ref(false)
-const offlineName = ref('')
 const defaultUser = ref<string | undefined>()
+// Heads rendered from Ely.by skins, keyed by account UUID
+const elybyHeads = ref<Record<string, string>>({})
+
+async function loadElybyHeads() {
+	for (const account of accounts.value) {
+		if (!isNonMicrosoftAccount(account) || elybyHeads.value[account.profile.id]) continue
+
+		try {
+			const skin = await get_elyby_skin(account.profile.name)
+			if (!skin) continue
+			const blob = await generatePlayerHeadBlob(skin.texture, 64)
+			elybyHeads.value = { ...elybyHeads.value, [account.profile.id]: URL.createObjectURL(blob) }
+		} catch (error) {
+			console.warn('Failed to load Ely.by skin:', error)
+		}
+	}
+}
 const equippedSkin = ref<Skin | null>(null)
 const equippedHeadUrl = ref<string>()
 let headRequest = 0
@@ -184,6 +169,7 @@ async function updateHeadUrl(skin: Skin | null) {
 onUnmounted(() => {
 	headRequest++
 	if (equippedHeadUrl.value) URL.revokeObjectURL(equippedHeadUrl.value)
+	Object.values(elybyHeads.value).forEach((url) => URL.revokeObjectURL(url))
 })
 
 async function refreshValues() {
@@ -191,6 +177,7 @@ async function refreshValues() {
 	const userList = await users().catch(handleError)
 	accounts.value = Array.isArray(userList) ? [...userList] : []
 	accounts.value.sort((a, b) => (a.profile?.name ?? '').localeCompare(b.profile?.name ?? ''))
+	void loadElybyHeads()
 
 	try {
 		const skins = await get_available_skins()
@@ -232,6 +219,12 @@ const selectedAccount = computed(() =>
 )
 
 const avatarUrl = computed(() => {
+	if (selectedAccount.value && isNonMicrosoftAccount(selectedAccount.value)) {
+		return (
+			elybyHeads.value[selectedAccount.value.profile.id] ??
+			'https://launcher-files.modrinth.com/assets/steve_head.png'
+		)
+	}
 	if (equippedSkin.value?.texture_key) {
 		const cachedUrl = equippedHeadUrl.value
 		if (cachedUrl) {
@@ -246,6 +239,12 @@ const avatarUrl = computed(() => {
 })
 
 function getAccountAvatarUrl(account: MinecraftCredential) {
+	if (isNonMicrosoftAccount(account)) {
+		return (
+			elybyHeads.value[account.profile.id] ??
+			'https://launcher-files.modrinth.com/assets/steve_head.png'
+		)
+	}
 	if (
 		account.profile.id === selectedAccount.value?.profile?.id &&
 		equippedSkin.value?.texture_key
@@ -265,29 +264,9 @@ async function setAccount(account: MinecraftCredential) {
 	emit('change')
 }
 
+// Opens the shared sign-in modal (nickname, Ely.by or Microsoft)
 async function login() {
-	loginDisabled.value = true
-	const loggedIn = await login_flow().catch(handleSevereError)
-
-	if (loggedIn) {
-		await setAccount(loggedIn)
-	}
-
-	trackEvent('AccountLogIn')
-	loginDisabled.value = false
-}
-
-async function loginOffline() {
-	if (!offlineName.value.trim()) return
-	loginDisabled.value = true
-	const loggedIn = await login_offline(offlineName.value).catch(handleError)
-
-	if (loggedIn) {
-		offlineName.value = ''
-		await setAccount(loggedIn)
-	}
-
-	loginDisabled.value = false
+	useError().minecraftRequiredModal?.show()
 }
 
 async function logout(id: string) {
@@ -328,21 +307,9 @@ const messages = defineMessages({
 		id: 'minecraft-account.label',
 		defaultMessage: 'Minecraft account',
 	},
-	signInToMinecraft: {
-		id: 'minecraft-account.sign-in',
-		defaultMessage: 'Sign in to Minecraft',
-	},
-	nicknamePlaceholder: {
-		id: 'minecraft-account.offline.nickname-placeholder',
-		defaultMessage: 'Ник',
-	},
-	playOffline: {
-		id: 'minecraft-account.offline.play',
-		defaultMessage: 'Играть по нику',
-	},
-	addOfflineAccount: {
-		id: 'minecraft-account.offline.add',
-		defaultMessage: 'Добавить ник',
+	signIn: {
+		id: 'minecraft-account.mimiko.sign-in',
+		defaultMessage: 'Войти',
 	},
 })
 </script>

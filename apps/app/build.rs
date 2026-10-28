@@ -16,6 +16,7 @@ fn main() {
                         "login",
                         "login_offline",
                         "login_elyby",
+                        "get_elyby_skin",
                         "remove_user",
                         "get_default_user",
                         "set_default_user",

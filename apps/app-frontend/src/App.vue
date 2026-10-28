@@ -1,32 +1,24 @@
 <script setup>
 import { ModrinthApiError } from '@modrinth/api-client'
 import {
-	ArrowBigUpDashIcon,
-	ArrowLeftRightIcon,
 	CompassIcon,
 	ImageIcon,
-	LogOutIcon,
 	PlayIcon,
 	PlusIcon,
 	RefreshCwIcon,
 	SettingsIcon,
 	ShirtIcon,
-	ToggleRightIcon,
 	UserIcon,
-	UserPlusIcon,
-	XIcon,
 } from '@modrinth/assets'
 import {
 	AccountSwitchOverlay,
 	Admonition,
 	commonMessages,
-	commonSettingsMessages,
 	ContentInstallModal,
 	ContentUpdaterModal,
 	CreationFlowModal,
 	defineMessages,
 	I18nDebugPanel,
-	IconButton,
 	LoadingBar,
 	NotificationPanel,
 	PopupNotificationPanel,
@@ -87,7 +79,7 @@ import { provideMinecraftAccounts } from '@/features/minecraft-accounts/context'
 import AppSettingsModal from '@/features/settings/app-settings-modal/index.vue'
 import { provideSettingsActions } from '@/features/settings/settings-actions'
 import NewUpdateModal from '@/features/updates/new-update-modal/index.vue'
-import { getAccountAppearance, rememberAccountAppearance } from '@/helpers/account-appearance.ts'
+import { rememberAccountAppearance } from '@/helpers/account-appearance.ts'
 import {
 	hide_ads_window,
 	init_ads_window,
@@ -112,9 +104,6 @@ import {
 	get as getCreds,
 	getAll as getAllCreds,
 	login,
-	logout,
-	removeUser,
-	setActive,
 } from '@/helpers/mr_auth.ts'
 import { mergeUrlQuery, parseModrinthLink } from '@/helpers/project-links.ts'
 import {
@@ -134,7 +123,6 @@ import {
 } from '@/helpers/synced-options'
 import { syncedPackQueryOptions } from '@/helpers/synced-packs'
 import { hasActivePride26Midas, hasMidasBadge } from '@/helpers/user-campaigns.ts'
-import { get_user_preferences } from '@/helpers/user-preferences.ts'
 import { parse_modrinth_user_link } from '@/helpers/users'
 import {
 	areUpdatesEnabled,
@@ -557,6 +545,10 @@ const messages = defineMessages({
 	home: {
 		id: 'app.nav.home',
 		defaultMessage: 'Home',
+	},
+	signInToGame: {
+		id: 'app.nav.mimiko.sign-in',
+		defaultMessage: 'Вход: ник, Ely.by или Microsoft',
 	},
 	modrinthHosting: {
 		id: 'app.nav.modrinth-hosting',
@@ -1169,11 +1161,6 @@ async function requestModrinthAuth(flow = 'sign-in', addAccount = false) {
 	return !!credentials.value?.session
 }
 
-async function logOut() {
-	if (!credentials.value?.user) return
-	await completeAccountSwitch(() => logout())
-}
-
 async function fetchStoredModrinthAccounts() {
 	const all = (await getAllCreds().catch(handleError)) ?? []
 	const ids = all.map((account) => account.user_id)
@@ -1191,151 +1178,7 @@ async function fetchStoredModrinthAccounts() {
 	}))
 }
 
-const accountSwitcherAccounts = computed(() => {
-	const currentId = credentials.value?.session ? credentials.value.user_id : null
-
-	return storedModrinthAccounts.value.map((account) => ({
-		...account,
-		optionId: `account-${account.user_id}`,
-		current: account.user_id === currentId,
-	}))
-})
-
-const profileButtonTooltip = computed(() => {
-	if (credentials.value === undefined) return formatMessage(messages.loadingProfile)
-	if (credentials.value?.user) return formatMessage(messages.modrinthAccount)
-	return formatMessage(messages.signInToModrinthAccount)
-})
-
-const accountSwitcherOptions = computed(() => [
-	...accountSwitcherAccounts.value.map((account) => ({
-		id: account.optionId,
-		label: account.user.username,
-		selected: account.current,
-		action: () => switchModrinthAccount(account),
-		trailingAction: {
-			label: formatMessage(messages.removeAccount),
-			icon: XIcon,
-			color: 'red',
-			action: () => forgetModrinthAccount(account.user_id),
-		},
-	})),
-	{
-		type: 'divider',
-	},
-	{
-		id: 'add-account',
-		label: formatMessage(messages.addAccount),
-		icon: PlusIcon,
-		action: () => requestSignIn('sign-in', true),
-	},
-])
-
 const isSwitchingAccount = ref(false)
-
-async function persistAppearanceTheme(appearance) {
-	const selectedTheme = appearance.auto ? 'system' : appearance.theme
-	appTheme.applyAccountAppearance(appearance)
-	const settings = await getSettings()
-	if (settings.theme !== selectedTheme) {
-		settings.theme = selectedTheme
-		await setSettings(settings)
-	}
-}
-
-async function completeAccountSwitch(task) {
-	isSwitchingAccount.value = true
-	await nextTick()
-	try {
-		await task()
-		window.location.reload()
-	} catch (error) {
-		isSwitchingAccount.value = false
-		handleError(error)
-	}
-}
-
-async function switchModrinthAccount(account) {
-	if (account.current) return
-
-	const cached = getAccountAppearance(account.user_id)
-	if (cached) await persistAppearanceTheme(cached)
-	await nextTick()
-
-	await completeAccountSwitch(async () => {
-		await setActive(account.user_id)
-		if (cached) return
-
-		try {
-			const preferences = await get_user_preferences(account.user_id)
-			rememberAccountAppearance(account.user_id, preferences.appearance)
-			await persistAppearanceTheme(preferences.appearance)
-			await nextTick()
-		} catch {
-			// no saved appearance for this account
-		}
-	})
-}
-
-async function forgetModrinthAccount(userId) {
-	const isCurrent = credentials.value?.user_id === userId && !!credentials.value?.session
-	if (isCurrent) {
-		await completeAccountSwitch(() => removeUser(userId))
-		return
-	}
-
-	await removeUser(userId).catch(handleError)
-	await fetchStoredModrinthAccounts()
-}
-
-const modrinthAccountMenuOptions = computed(() => [
-	{
-		id: 'view-profile',
-		label: formatMessage(messages.viewProfile),
-		icon: UserIcon,
-		action: () => router.push(`/user/${encodeURIComponent(credentials.value.user.username)}`),
-	},
-	{
-		id: 'plus',
-		label: formatMessage(messages.upgradeToModrinthPlus),
-		icon: ArrowBigUpDashIcon,
-		type: 'link',
-		href: 'https://modrinth.plus?app',
-		target: '_blank',
-		tone: 'purple',
-		shown: !hasPlus.value,
-	},
-	{
-		id: 'add-friend',
-		label: formatMessage(messages.addFriend),
-		icon: UserPlusIcon,
-		action: () => sidebar.value?.showAddFriendModal(),
-	},
-	{
-		id: 'flags',
-		label: formatMessage(commonSettingsMessages.featureFlags),
-		icon: ToggleRightIcon,
-		shown: appSettings.devMode,
-		action: settingsActions.openFeatureFlags,
-	},
-	{
-		type: 'divider',
-	},
-	{
-		id: 'switch-account',
-		label: formatMessage(messages.switchAccount),
-		icon: ArrowLeftRightIcon,
-		type: 'submenu',
-		options: accountSwitcherOptions.value,
-	},
-	{
-		id: 'sign-out',
-		label: formatMessage(commonMessages.signOutButton),
-		icon: LogOutIcon,
-		tone: 'red',
-		action: () => logOut(),
-	},
-])
 
 async function fetchIntercomToken() {
 	const creds = await getCreds()
@@ -2058,6 +1901,12 @@ provideAppUpdateDownloadProgress(appUpdateDownload)
 				:to="settingsActions.openSettings"
 			>
 				<SettingsIcon />
+			</NavButton>
+			<NavButton
+				v-tooltip.right="formatMessage(messages.signInToGame)"
+				:to="() => minecraftRequiredModal?.show()"
+			>
+				<UserIcon />
 			</NavButton>
 		</div>
 		<AppTitleBar

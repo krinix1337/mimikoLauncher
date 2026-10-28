@@ -48,6 +48,22 @@ export async function login_elyby(username, password) {
 }
 
 /**
+ * Gets the Ely.by skin of a player name as a data URL, or null if there is none.
+ * @returns {Promise<{ texture: string, slim: boolean } | null>}
+ */
+export async function get_elyby_skin(username) {
+	return await invoke('plugin:auth|get_elyby_skin', { username })
+}
+
+/**
+ * Whether an account is a nickname or Ely.by account rather than a Microsoft one.
+ */
+export function isNonMicrosoftAccount(account) {
+	const token = account?.refresh_token ?? ''
+	return token === 'mimiko-offline' || token.startsWith('elyby:')
+}
+
+/**
  * Retrieves the default user
  * @return {Promise<UUID | undefined>}
  */

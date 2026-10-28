@@ -12,6 +12,7 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
             login,
             login_offline,
             login_elyby,
+            get_elyby_skin,
             remove_user,
             get_default_user,
             set_default_user,
@@ -99,6 +100,14 @@ pub async fn login_elyby(
     password: String,
 ) -> Result<Credentials> {
     Ok(minecraft_auth::login_elyby(&username, &password).await?)
+}
+
+/// Gets the Ely.by skin of a player name, used for nickname and Ely.by accounts
+#[tauri::command]
+pub async fn get_elyby_skin(
+    username: String,
+) -> Result<Option<minecraft_auth::ElybySkin>> {
+    Ok(minecraft_auth::get_elyby_skin(&username).await?)
 }
 
 #[tauri::command]
