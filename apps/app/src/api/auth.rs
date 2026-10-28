@@ -11,6 +11,7 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
             check_reachable,
             login,
             login_offline,
+            login_elyby,
             remove_user,
             get_default_user,
             set_default_user,
@@ -89,6 +90,15 @@ pub async fn login<R: Runtime>(
 #[tauri::command]
 pub async fn login_offline(username: String) -> Result<Credentials> {
     Ok(minecraft_auth::login_offline(&username).await?)
+}
+
+/// Signs into an Ely.by account
+#[tauri::command]
+pub async fn login_elyby(
+    username: String,
+    password: String,
+) -> Result<Credentials> {
+    Ok(minecraft_auth::login_elyby(&username, &password).await?)
 }
 
 #[tauri::command]

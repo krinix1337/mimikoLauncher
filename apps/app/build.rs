@@ -15,6 +15,7 @@ fn main() {
                         "check_reachable",
                         "login",
                         "login_offline",
+                        "login_elyby",
                         "remove_user",
                         "get_default_user",
                         "set_default_user",

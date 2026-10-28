@@ -1157,6 +1157,13 @@ pub async fn launch_minecraft(
         .into_iter(),
     );
 
+    // Ely.by accounts authenticate and load skins through authlib-injector
+    if credentials.is_elyby() {
+        let agent =
+            crate::state::authlib_injector_path(&state.directories).await?;
+        command.arg(format!("-javaagent:{}=ely.by", agent.display()));
+    }
+
     // The java launcher requires access to java.lang.reflect in order to force access in to
     // whatever module the main class is in
     if java_version.parsed_version >= 9 {

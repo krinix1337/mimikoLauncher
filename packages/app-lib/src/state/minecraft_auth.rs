@@ -399,6 +399,9 @@ impl Credentials {
         if self.is_offline() {
             return Ok(());
         }
+        if self.is_elyby() {
+            return self.refresh_elyby(exec).await;
+        }
 
         // Use a margin of 5 minutes to give e.g. Minecraft and potentially
         // other operations that depend on a fresh token 5 minutes to complete
@@ -480,7 +483,8 @@ impl Credentials {
         &self,
         cache_intent: OnlineProfileCacheIntent,
     ) -> Option<Arc<MinecraftProfile>> {
-        if self.is_offline() {
+        // Neither account kind has a Mojang profile to fetch
+        if self.is_offline() || self.is_elyby() {
             return None;
         }
 

@@ -41,6 +41,13 @@ export async function login_offline(username) {
 }
 
 /**
+ * Signs into an Ely.by account.
+ */
+export async function login_elyby(username, password) {
+	return await invoke('plugin:auth|login_elyby', { username, password })
+}
+
+/**
  * Retrieves the default user
  * @return {Promise<UUID | undefined>}
  */

@@ -67,6 +67,28 @@ pub async fn login_offline(username: &str) -> crate::Result<Credentials> {
     Ok(credentials)
 }
 
+/// Signs into an Ely.by account and makes it the active one
+#[tracing::instrument(skip(password))]
+pub async fn login_elyby(
+    username: &str,
+    password: &str,
+) -> crate::Result<Credentials> {
+    let state = State::get().await?;
+
+    let credentials =
+        crate::state::login_elyby(username, password, &state.pool).await?;
+
+    if let Err(error) =
+        crate::onboarding_checklist::mark_logged_into_minecraft().await
+    {
+        tracing::warn!(
+            "Failed to mark Minecraft login in onboarding checklist: {error}"
+        );
+    }
+
+    Ok(credentials)
+}
+
 #[tracing::instrument]
 pub async fn get_default_user() -> crate::Result<Option<uuid::Uuid>> {
     let state = State::get().await?;

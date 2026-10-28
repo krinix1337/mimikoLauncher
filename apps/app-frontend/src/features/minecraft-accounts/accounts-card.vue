@@ -15,6 +15,7 @@
 			<SpinnerIcon v-else class="animate-spin" />
 			{{ formatMessage(messages.playOffline) }}
 		</Button>
+		<ElybyLoginForm :disabled="loginDisabled" @logged-in="setAccount" />
 		<Button :disabled="loginDisabled" @click="login()">
 			{{ formatMessage(messages.signInToMinecraft) }}
 		</Button>
@@ -94,6 +95,7 @@
 					<PlusIcon />
 					{{ formatMessage(messages.addOfflineAccount) }}
 				</Button>
+				<ElybyLoginForm :disabled="loginDisabled" @logged-in="setAccount" />
 				<Button
 					v-if="accounts.length > 0"
 					class="w-full !bg-button-bg !text-primary ![box-shadow:var(--shadow-button)]"
@@ -142,6 +144,8 @@ import {
 	users,
 } from '@/helpers/auth'
 import { getPlayerHeadUrl } from '@/helpers/rendering/player-head'
+
+import ElybyLoginForm from './elyby-login-form.vue'
 import type { Skin } from '@/helpers/skins'
 import { get_available_skins } from '@/helpers/skins'
 
