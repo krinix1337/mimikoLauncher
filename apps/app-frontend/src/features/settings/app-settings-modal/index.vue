@@ -7,7 +7,6 @@ import {
 	HeartHandshakeIcon,
 	LanguagesIcon,
 	LightBulbIcon,
-	ModrinthIcon,
 	PaintbrushIcon,
 	RefreshCwIcon,
 	Settings2Icon,
@@ -423,7 +422,7 @@ const messages = defineMessages({
 						}"
 						@click="devModeCount"
 					>
-						<ModrinthIcon aria-hidden="true" class="w-6 h-6" />
+						<span aria-hidden="true" class="block w-6 h-6 text-xl font-extrabold leading-6">m</span>
 					</button>
 					<div v-if="appInfo" class="max-w-[200px]">
 						<p class="m-0">

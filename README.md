@@ -1,48 +1,55 @@
-<picture>
-	<source media="(prefers-color-scheme: light)" srcset=".github/assets/monorepo_cover_light.png">
-	<img alt="Modrinth Monorepo Cover" src=".github/assets/monorepo_cover.png">
-</picture>
+<div align="center">
 
-![Issues](https://img.shields.io/github/issues-raw/Modrinth/code?color=c78aff&label=issues&style=for-the-badge)
-![Pull Requests](https://img.shields.io/github/issues-pr-raw/Modrinth/code?color=c78aff&label=PRs&style=for-the-badge)
-![Contributors](https://img.shields.io/github/contributors/Modrinth/code?color=c78aff&label=contributors&style=for-the-badge)
-![Lines of Code](https://img.shields.io/endpoint?url=https://loctopus.creeperkatze.dev/github/modrinth/code/badge?style=flat&logoColor=white&color=c78aff&style=for-the-badge)
-![Commit Activity](https://img.shields.io/github/commit-activity/m/Modrinth/code?color=c78aff&label=commits&style=for-the-badge)
-![Last Commit](https://img.shields.io/github/last-commit/Modrinth/code?color=c78aff&label=last%20commit&style=for-the-badge)
+<img src="apps/app/icons/128x128@2x.png" width="128" alt="mimikoLauncher" />
 
-## Modrinth Monorepo
+# mimikoLauncher
 
-Welcome to the Modrinth Monorepo, the primary codebase for the Modrinth website, app, API and documentation. It contains ![Lines of code](https://img.shields.io/endpoint?url=https://loctopus.creeperkatze.dev/github/modrinth/code/badge%3Fformat%3Dhuman&logoColor=white&color=black&label=) lines of code and has ![Contributors](https://img.shields.io/github/contributors/Modrinth/code?color=black&label=) contributors!
+**Лаунчер Minecraft с дизайном Modrinth App — без рекламы и без обязательного аккаунта Microsoft.**
 
-If you're not a developer and you've stumbled upon this repository, you can access the web interface on the [Modrinth website](https://modrinth.com) and download the latest release of the app [here](https://modrinth.com/app).
+[![Tauri](https://img.shields.io/badge/Tauri-2-1bd96a?style=for-the-badge&logo=tauri&logoColor=white)](https://tauri.app)
+[![Rust](https://img.shields.io/badge/Rust-1.95-1bd96a?style=for-the-badge&logo=rust&logoColor=white)](https://www.rust-lang.org)
+[![Vue](https://img.shields.io/badge/Vue-3-1bd96a?style=for-the-badge&logo=vuedotjs&logoColor=white)](https://vuejs.org)
+[![License](https://img.shields.io/badge/license-GPL--3.0-1bd96a?style=for-the-badge)](apps/app/LICENSE)
 
-## Development
+[mimiko.fun](https://mimiko.fun)
 
-This repository contains several projects. For detailed development information, please refer to their respective guides:
+</div>
 
-| Project       | Directory              | Guide                                                     |
-| ------------- | ---------------------- | --------------------------------------------------------- |
-| Website       | `apps/frontend`        | [Guide](https://docs.modrinth.com/contributing/knossos/)  |
-| App           | `apps/app`             | [Guide](https://docs.modrinth.com/contributing/theseus/)  |
-| API           | `apps/labrinth`        | [Guide](https://docs.modrinth.com/contributing/labrinth/) |
-| Documentation | `apps/docs`            | [Guide](https://docs.modrinth.com/contributing/docs/)     |
+---
 
-Shared libraries live in `packages/`.
+## ✨ Возможности
 
-## Contributing
+| | |
+|---|---|
+| 🎮 **Вход по нику** | Играй без лицензии: введи ник — и в игру. UUID совпадает с офлайн-режимом сервера |
+| 🧑‍🎨 **Ely.by** | Вход через аккаунт [Ely.by](https://ely.by) со скинами *(в работе)* |
+| 🚫 **Без рекламы** | Никаких баннеров, промо и окон согласия на рекламу |
+| 📦 **Моды и модпаки** | Поиск и установка с Modrinth, `.mrpack`, Fabric / Quilt / Forge / NeoForge |
+| 🗂️ **Сборки** | Отдельные экземпляры со своей версией, модами и настройками Java |
+| ⚡ **Лёгкий** | Tauri вместо Electron — меньше памяти, больше ОЗУ для игры |
 
-We welcome contributions! Before submitting any contributions, please read our [contributing guidelines](https://docs.modrinth.com/contributing/getting-started/).
+## 🛠️ Сборка
 
-If you plan to fork this repository for your own purposes, please review our [copying guidelines](COPYING.md).
+Нужны **Rust** (`rustup`), **Node.js 24+**, **pnpm** и на Windows — **Visual Studio Build Tools** (C++).
 
-## Security
+```bash
+pnpm install
+cp packages/app-lib/.env.prod packages/app-lib/.env
+pnpm app:dev      # запуск в режиме разработки
+pnpm app:build    # сборка установщика
+```
 
-If you discover a security vulnerability within our codebase, please follow our [responsible disclosure guidelines](https://modrinth.com/legal/security).
+> Первая сборка Rust долгая. Чтобы компьютер не лагал, ограничь потоки: `CARGO_BUILD_JOBS=4`.
 
-## Support
+## 🗺️ Планы
 
-If you need help with the Modrinth web interface or app, please visit our [support page](https://support.modrinth.com). For general inquiries, you can also join our [Discord server](https://discord.modrinth.com).
+- [x] Убрать рекламу и сервисы Modrinth (друзья, новости, Modrinth+)
+- [x] Вход по нику без Microsoft
+- [ ] Вход через Ely.by и скины (authlib-injector)
+- [ ] Вырезать хостинг и прочие лишние разделы Modrinth
+- [ ] Свои фишки mimiko
 
-## License
+## 📄 Лицензия
 
-All packages in this repository are licensed under their respective licenses. See the [copying guidelines](COPYING.md) for details, including restrictions on Modrinth branding.
+mimikoLauncher основан на открытом [Modrinth App](https://github.com/modrinth/code) и распространяется по лицензии **GPL-3.0** (см. [`apps/app/LICENSE`](apps/app/LICENSE)).
+Название и логотип Modrinth — товарные знаки Rinth, Inc.; проект с ними не связан и их не использует.
