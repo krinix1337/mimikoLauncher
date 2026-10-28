@@ -952,9 +952,9 @@ const newUpdateModal = ref()
 
 const settingsActions = provideSettingsActions({
 	openSettings: () => appSettingsModal.value?.show(),
-	openProfile: () => appSettingsModal.value?.showProfile(),
+	openProfile: () => appSettingsModal.value?.show(),
 	openFeatureFlags: () => appSettingsModal.value?.showFeatureFlags(),
-	openSyncedOptions: () => appSettingsModal.value?.showSyncedOptions(),
+	openSyncedOptions: () => appSettingsModal.value?.show(),
 	openInstanceDefaults: (tab) => appSettingsModal.value?.showInstanceDefaults(tab),
 })
 

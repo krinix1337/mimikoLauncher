@@ -30,19 +30,6 @@ const settingsModal = injectAppSettingsModal()
 const queryClient = useQueryClient()
 
 const messages = defineMessages({
-	syncAcrossDevicesTitle: {
-		id: 'app.behavior-settings.sync-across-devices.title',
-		defaultMessage: 'Sync behavior across devices',
-	},
-	syncAcrossDevicesDescription: {
-		id: 'app.behavior-settings.sync-across-devices.description',
-		defaultMessage:
-			"Use these behavior settings everywhere you're signed in. Turn this off to keep separate settings on this device.",
-	},
-	syncAcrossDevicesSignedOutTooltip: {
-		id: 'app.behavior-settings.sync-across-devices.signed-out-tooltip',
-		defaultMessage: 'Sign into a Modrinth account to sync settings.',
-	},
 	startupAndNavigationTitle: {
 		id: 'app.behavior-settings.startup-and-navigation.title',
 		defaultMessage: 'Startup and navigation',
@@ -61,7 +48,7 @@ const messages = defineMessages({
 	},
 	minimizeLauncherDescription: {
 		id: 'app.appearance-settings.minimize-launcher.description',
-		defaultMessage: 'Minimize Modrinth App when Minecraft starts.',
+		defaultMessage: 'Minimize mimikoLauncher when Minecraft starts.',
 	},
 	refocusOnGameCloseTitle: {
 		id: 'app.behavior-settings.refocus-on-game-close.title',
@@ -69,7 +56,7 @@ const messages = defineMessages({
 	},
 	refocusOnGameCloseDescription: {
 		id: 'app.behavior-settings.refocus-on-game-close.description',
-		defaultMessage: 'Bring Modrinth App to the foreground when Minecraft exits.',
+		defaultMessage: 'Bring mimikoLauncher to the foreground when Minecraft exits.',
 	},
 	defaultLandingPageHome: {
 		id: 'app.appearance-settings.default-landing-page.home',
@@ -238,34 +225,7 @@ onBeforeUnmount(() => {
 })
 </script>
 <template>
-	<section class="border-0 border-b border-solid border-divider pb-6">
-		<div class="flex items-center justify-between gap-4">
-			<div>
-				<h2 id="sync-behavior-across-devices-label" class="m-0 text-lg font-semibold text-contrast">
-					{{ formatMessage(messages.syncAcrossDevicesTitle) }}
-				</h2>
-				<p class="m-0 mt-1 text-secondary">
-					{{ formatMessage(messages.syncAcrossDevicesDescription) }}
-				</p>
-			</div>
-			<span
-				v-tooltip="
-					!auth.user.value ? formatMessage(messages.syncAcrossDevicesSignedOutTooltip) : undefined
-				"
-				class="inline-flex shrink-0"
-			>
-				<Toggle
-					id="sync-behavior-across-devices"
-					:model-value="Boolean(auth.user.value) && current.syncBehaviorAcrossDevices"
-					:disabled="!auth.user.value"
-					aria-labelledby="sync-behavior-across-devices-label"
-					@update:model-value="current.syncBehaviorAcrossDevices = $event"
-				/>
-			</span>
-		</div>
-	</section>
-
-	<section class="mt-6">
+	<section>
 		<h2 class="m-0 text-xl font-semibold text-contrast">
 			{{ formatMessage(messages.startupAndNavigationTitle) }}
 		</h2>

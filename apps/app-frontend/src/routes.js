@@ -14,43 +14,6 @@ export default new createRouter({
 			},
 		},
 		{
-			path: '/hosting/manage/',
-			name: 'Servers',
-			component: () => import('@/platform/adapters/hosting/servers-page.vue'),
-		},
-		{
-			path: '/hosting/manage/:id',
-			name: 'ServerManage',
-			component: () => import('@/platform/adapters/hosting/manage/layout.vue'),
-			children: [
-				{
-					path: '',
-					name: 'ServerManageOverview',
-					component: () => import('@/platform/adapters/hosting/manage/overview-page.vue'),
-				},
-				{
-					path: 'content',
-					name: 'ServerManageContent',
-					component: () => import('@/platform/adapters/hosting/manage/content-page.vue'),
-				},
-				{
-					path: 'files',
-					name: 'ServerManageFiles',
-					component: () => import('@/platform/adapters/hosting/manage/files-page.vue'),
-				},
-				{
-					path: 'backups',
-					name: 'ServerManageBackups',
-					component: () => import('@/platform/adapters/hosting/manage/backups-page.vue'),
-				},
-				{
-					path: 'access',
-					name: 'ServerManageAccess',
-					component: () => import('@/platform/adapters/hosting/manage/access-page.vue'),
-				},
-			],
-		},
-		{
 			path: '/browse/:projectType',
 			name: 'Discover content',
 			component: () => import('@/platform/adapters/browse/browse-page.vue'),
@@ -67,11 +30,6 @@ export default new createRouter({
 			path: '/screenshots',
 			name: 'Screenshots',
 			component: () => import('@/pages/Screenshots.vue'),
-		},
-		{
-			path: '/user/:user/:projectType?',
-			name: 'User',
-			component: () => import('@/pages/User.vue'),
 		},
 		{
 			path: '/:projectType(mod|plugin|datapack|resourcepack|shader|modpack)/:id/:rest(.*)*',
@@ -118,11 +76,6 @@ export default new createRouter({
 					path: 'worlds',
 					name: 'InstanceWorlds',
 					component: () => import('@/pages/instance/worlds/index.vue'),
-				},
-				{
-					path: 'share',
-					name: 'InstanceShare',
-					component: () => import('@/pages/instance/share/index.vue'),
 				},
 				{
 					path: '',

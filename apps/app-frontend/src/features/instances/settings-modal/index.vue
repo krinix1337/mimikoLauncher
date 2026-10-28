@@ -5,8 +5,6 @@ import {
 	CodeIcon,
 	CoffeeIcon,
 	InfoIcon,
-	Settings2Icon,
-	UsersIcon,
 	WindowIcon,
 	WrenchIcon,
 } from '@modrinth/assets'
@@ -34,8 +32,6 @@ import HooksSettings from './hooks-settings.vue'
 import InstallationSettings from './installation-settings.vue'
 import { provideInstanceSettings } from './instance-settings-context.ts'
 import JavaSettings from './java-settings.vue'
-import SharingSettings from './sharing-settings.vue'
-import SyncedOptionsSettings from './synced-options-settings.vue'
 import WindowSettings from './window-settings.vue'
 
 const { formatMessage } = useVIntl()
@@ -124,16 +120,6 @@ const tabs = computed<TabbedModalTab[]>(() => [
 	},
 	{
 		name: defineMessage({
-			id: 'instance.settings.tabs.sharing',
-			defaultMessage: 'Sharing',
-		}),
-		category: tabCategories.instance,
-		icon: UsersIcon,
-		content: SharingSettings,
-		shown: props.instance.shared_instance?.role === 'owner' && !props.instance.quarantined,
-	},
-	{
-		name: defineMessage({
 			id: 'instance.settings.tabs.java.label',
 			defaultMessage: 'Java and memory',
 		}),
@@ -158,15 +144,6 @@ const tabs = computed<TabbedModalTab[]>(() => [
 		icon: CodeIcon,
 		category: tabCategories.game,
 		content: HooksSettings,
-	},
-	{
-		name: defineMessage({
-			id: 'instance.settings.tabs.syncing',
-			defaultMessage: 'Syncing',
-		}),
-		icon: Settings2Icon,
-		category: tabCategories.game,
-		content: SyncedOptionsSettings,
 	},
 ])
 

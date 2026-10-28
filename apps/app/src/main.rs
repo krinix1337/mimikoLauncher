@@ -7,12 +7,41 @@
 use anyhow::Context;
 use native_dialog::{DialogBuilder, MessageLevel};
 use std::env;
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
+use std::time::Duration;
 use tauri::{Listener, Manager};
 use tauri_plugin_fs::FsExt;
+use tauri_plugin_window_state::{AppHandleExt, StateFlags};
 use theseus::prelude::*;
 
 mod api;
+
+/// Delay after the last resize or move before the window state is written.
+const WINDOW_STATE_SAVE_DELAY: Duration = Duration::from_millis(500);
+
+/// Counts window geometry changes so only the last one in a burst saves.
+static WINDOW_STATE_CHANGES: AtomicU64 = AtomicU64::new(0);
+
+/// Saves the window state right away, logging instead of failing.
+fn save_window_state_now(app: &tauri::AppHandle, flags: StateFlags) {
+    if let Err(error) = app.save_window_state(flags) {
+        tracing::warn!("Failed to save window state: {error}");
+    }
+}
+
+/// Saves the window state shortly after the window stops being resized or
+/// moved, so the geometry survives crashes and closing from outside the app.
+fn schedule_window_state_save(app: tauri::AppHandle, flags: StateFlags) {
+    let change = WINDOW_STATE_CHANGES.fetch_add(1, Ordering::SeqCst) + 1;
+
+    tauri::async_runtime::spawn(async move {
+        tokio::time::sleep(WINDOW_STATE_SAVE_DELAY).await;
+
+        if WINDOW_STATE_CHANGES.load(Ordering::SeqCst) == change {
+            save_window_state_now(&app, flags);
+        }
+    });
+}
 
 #[cfg(target_os = "macos")]
 mod macos;
@@ -255,6 +284,26 @@ fn main() {
                 .with_state_flags(window_state_flags)
                 .build(),
         )
+        .on_window_event(move |window, event| {
+            use tauri::WindowEvent;
+
+            if window.label() != "main" {
+                return;
+            }
+
+            match event {
+                WindowEvent::Resized(_) | WindowEvent::Moved(_) => {
+                    schedule_window_state_save(
+                        window.app_handle().clone(),
+                        window_state_flags,
+                    );
+                }
+                WindowEvent::CloseRequested { .. } | WindowEvent::Destroyed => {
+                    save_window_state_now(window.app_handle(), window_state_flags);
+                }
+                _ => {}
+            }
+        })
         .setup(|app| {
             #[cfg(target_os = "macos")]
             {

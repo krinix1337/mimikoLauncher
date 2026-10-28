@@ -241,17 +241,6 @@ impl State {
             if let Err(e) = res {
                 tracing::error!("Error running discord RPC: {e}");
             }
-
-            let _ = state
-                .presence
-                .friends_socket
-                .connect(
-                    &state.pool,
-                    &state.api_semaphore,
-                    &state.process_manager,
-                )
-                .await;
-            let _ = FriendsSocket::socket_loop(Arc::clone(state)).await;
         });
 
         Ok(())
