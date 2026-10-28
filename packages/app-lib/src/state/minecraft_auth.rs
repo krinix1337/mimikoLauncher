@@ -268,6 +268,55 @@ pub async fn login_finish(
     Ok(credentials)
 }
 
+/// Marker stored as the refresh token of offline accounts, which have no
+/// Microsoft session to refresh.
+pub const OFFLINE_REFRESH_TOKEN: &str = "mimiko-offline";
+
+/// Computes the player UUID the vanilla server assigns to an offline-mode
+/// player, i.e. Java's `UUID.nameUUIDFromBytes("OfflinePlayer:" + name)`.
+pub fn offline_player_uuid(username: &str) -> Uuid {
+    let hash = md5::Md5::digest(format!("OfflinePlayer:{username}").as_bytes());
+    let mut bytes = [0u8; 16];
+    bytes.copy_from_slice(&hash);
+    uuid::Builder::from_md5_bytes(bytes).into_uuid()
+}
+
+#[tracing::instrument]
+pub async fn login_offline(
+    username: &str,
+    exec: impl sqlx::Executor<'_, Database = sqlx::Sqlite> + Copy,
+) -> crate::Result<Credentials> {
+    let username = username.trim();
+    if !(3..=16).contains(&username.len())
+        || !username
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || c == '_')
+    {
+        return Err(ErrorKind::InputError(
+            "Ник должен быть от 3 до 16 символов: латиница, цифры и _"
+                .to_string(),
+        )
+        .into());
+    }
+
+    let id = offline_player_uuid(username);
+    let credentials = Credentials {
+        offline_profile: MinecraftProfile {
+            id,
+            name: username.to_string(),
+            ..MinecraftProfile::default()
+        },
+        access_token: id.simple().to_string(),
+        refresh_token: OFFLINE_REFRESH_TOKEN.to_string(),
+        expires: Utc::now() + Duration::days(365 * 100),
+        active: true,
+    };
+
+    credentials.upsert(exec).await?;
+
+    Ok(credentials)
+}
+
 #[derive(Deserialize, Debug)]
 pub struct Credentials {
     /// The offline profile of the user these credentials are for.
@@ -336,12 +385,21 @@ impl OnlineProfileCacheIntent {
 }
 
 impl Credentials {
+    /// Whether these credentials belong to an offline (nickname-only) account.
+    pub fn is_offline(&self) -> bool {
+        self.refresh_token == OFFLINE_REFRESH_TOKEN
+    }
+
     /// Refreshes the authentication tokens for this user if they are expired, or
     /// very close to expiration.
     async fn refresh(
         &mut self,
         exec: impl sqlx::Executor<'_, Database = sqlx::Sqlite> + Copy,
     ) -> crate::Result<()> {
+        if self.is_offline() {
+            return Ok(());
+        }
+
         // Use a margin of 5 minutes to give e.g. Minecraft and potentially
         // other operations that depend on a fresh token 5 minutes to complete
         // from now, and deal with some classes of clock skew
@@ -422,6 +480,10 @@ impl Credentials {
         &self,
         cache_intent: OnlineProfileCacheIntent,
     ) -> Option<Arc<MinecraftProfile>> {
+        if self.is_offline() {
+            return None;
+        }
+
         let max_age = cache_intent.max_age();
         let stale_profile = {
             let mut profile_cache = PROFILE_CACHE.lock().await;

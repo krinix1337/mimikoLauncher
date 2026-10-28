@@ -34,6 +34,13 @@ export async function login() {
 }
 
 /**
+ * Adds an offline account by nickname, without a Microsoft account.
+ */
+export async function login_offline(username) {
+	return await invoke('plugin:auth|login_offline', { username })
+}
+
+/**
  * Retrieves the default user
  * @return {Promise<UUID | undefined>}
  */

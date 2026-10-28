@@ -13789,6 +13789,7 @@ dependencies = [
  "infer 0.22.0",
  "itertools 0.15.0",
  "json5",
+ "md-5",
  "minecraft-meta-manifest",
  "modrinth-content-management",
  "notify",

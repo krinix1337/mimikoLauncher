@@ -4,9 +4,19 @@
 		class="flex flex-col gap-3 bg-button-bg border border-solid border-surface-5 rounded-xl p-3 mt-2"
 	>
 		<span>{{ formatMessage(messages.notSignedIn) }}</span>
-		<Button type="colored" color="brand" :disabled="loginDisabled" @click="login()">
+		<input
+			v-model="offlineName"
+			type="text"
+			maxlength="16"
+			:placeholder="formatMessage(messages.nicknamePlaceholder)"
+			@keydown.enter="loginOffline()"
+		/>
+		<Button type="colored" color="brand" :disabled="loginDisabled" @click="loginOffline()">
 			<LogInIcon v-if="!loginDisabled" />
 			<SpinnerIcon v-else class="animate-spin" />
+			{{ formatMessage(messages.playOffline) }}
+		</Button>
+		<Button :disabled="loginDisabled" @click="login()">
 			{{ formatMessage(messages.signInToMinecraft) }}
 		</Button>
 	</div>
@@ -71,6 +81,21 @@
 				</div>
 			</template>
 			<div class="flex flex-col gap-2 px-2 pt-2">
+				<input
+					v-model="offlineName"
+					type="text"
+					maxlength="16"
+					:placeholder="formatMessage(messages.nicknamePlaceholder)"
+					@keydown.enter="loginOffline()"
+				/>
+				<Button
+					class="w-full !bg-button-bg !text-primary ![box-shadow:var(--shadow-button)]"
+					:disabled="loginDisabled"
+					@click="loginOffline()"
+				>
+					<PlusIcon />
+					{{ formatMessage(messages.addOfflineAccount) }}
+				</Button>
 				<Button
 					v-if="accounts.length > 0"
 					class="w-full !bg-button-bg !text-primary ![box-shadow:var(--shadow-button)]"
@@ -112,6 +137,7 @@ import { trackEvent } from '@/helpers/analytics'
 import {
 	get_default_user,
 	login as login_flow,
+	login_offline,
 	remove_user,
 	set_default_user,
 	users,
@@ -136,6 +162,7 @@ type MinecraftCredential = {
 
 const accounts: Ref<MinecraftCredential[]> = ref([])
 const loginDisabled = ref(false)
+const offlineName = ref('')
 const defaultUser = ref<string | undefined>()
 const equippedSkin = ref<Skin | null>(null)
 const equippedHeadUrl = ref<string>()
@@ -247,6 +274,19 @@ async function login() {
 	loginDisabled.value = false
 }
 
+async function loginOffline() {
+	if (!offlineName.value.trim()) return
+	loginDisabled.value = true
+	const loggedIn = await login_offline(offlineName.value).catch(handleError)
+
+	if (loggedIn) {
+		offlineName.value = ''
+		await setAccount(loggedIn)
+	}
+
+	loginDisabled.value = false
+}
+
 async function logout(id: string) {
 	await remove_user(id).catch(handleError)
 	await refreshValues()
@@ -288,6 +328,18 @@ const messages = defineMessages({
 	signInToMinecraft: {
 		id: 'minecraft-account.sign-in',
 		defaultMessage: 'Sign in to Minecraft',
+	},
+	nicknamePlaceholder: {
+		id: 'minecraft-account.offline.nickname-placeholder',
+		defaultMessage: 'Ник',
+	},
+	playOffline: {
+		id: 'minecraft-account.offline.play',
+		defaultMessage: 'Играть по нику',
+	},
+	addOfflineAccount: {
+		id: 'minecraft-account.offline.add',
+		defaultMessage: 'Добавить ник',
 	},
 })
 </script>

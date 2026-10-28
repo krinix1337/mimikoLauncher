@@ -20,12 +20,21 @@
 		</div>
 
 		<div class="flex flex-col gap-6 px-6 pb-6">
-			<div class="grid grid-cols-2 gap-2">
-				<ButtonLink href="https://support.modrinth.com" @click="modal?.hide()">
-					<MessagesSquareIcon />
-					{{ formatMessage(messages.getSupport) }}
-				</ButtonLink>
-				<Button type="colored" color="brand" :disabled="loadingSignIn" @click="signIn">
+			<div class="flex gap-2">
+				<input
+					v-model="offlineName"
+					type="text"
+					maxlength="16"
+					class="grow"
+					:placeholder="formatMessage(messages.nicknamePlaceholder)"
+					@keydown.enter="playOffline"
+				/>
+				<Button type="colored" color="brand" :disabled="loadingSignIn" @click="playOffline">
+					{{ formatMessage(messages.playOffline) }}
+				</Button>
+			</div>
+			<div class="grid grid-cols-1 gap-2">
+				<Button :disabled="loadingSignIn" @click="signIn">
 					<SpinnerIcon v-if="loadingSignIn" class="animate-spin" />
 					<svg
 						v-else
@@ -35,75 +44,88 @@
 						fill="none"
 						xmlns="http://www.w3.org/2000/svg"
 					>
-						<rect width="9.25" height="9.25" fill="black" fill-opacity="0.9" />
-						<rect x="10.75" width="9.25" height="9.25" fill="black" fill-opacity="0.9" />
-						<rect y="10.75" width="9.25" height="9.25" fill="black" fill-opacity="0.9" />
-						<rect x="10.75" y="10.75" width="9.25" height="9.25" fill="black" fill-opacity="0.9" />
+						<rect width="9.25" height="9.25" fill="currentColor" fill-opacity="0.9" />
+						<rect x="10.75" width="9.25" height="9.25" fill="currentColor" fill-opacity="0.9" />
+						<rect y="10.75" width="9.25" height="9.25" fill="currentColor" fill-opacity="0.9" />
+						<rect
+							x="10.75"
+							y="10.75"
+							width="9.25"
+							height="9.25"
+							fill="currentColor"
+							fill-opacity="0.9"
+						/>
 					</svg>
 					{{ formatMessage(messages.signIn) }}
 				</Button>
 			</div>
-			<p class="m-0 text-center text-sm text-secondary">
-				{{ formatMessage(messages.dontHaveAccount) }}
-				<a
-					class="text-blue font-medium hover:underline"
-					href="https://www.minecraft.net/en-us/store/minecraft-java-bedrock-edition-pc"
-				>
-					{{ formatMessage(messages.getMinecraft) }}
-				</a>
-			</p>
 		</div>
 	</NewModal>
 </template>
 
 <script setup lang="ts">
-import { MessagesSquareIcon, SpinnerIcon } from '@modrinth/assets'
-import { Button, ButtonLink, defineMessages, NewModal, useVIntl } from '@modrinth/ui'
+import { SpinnerIcon } from '@modrinth/assets'
+import { Button, defineMessages, injectNotificationManager, NewModal, useVIntl } from '@modrinth/ui'
 import { ref } from 'vue'
 
 import steveImage from '@/assets/steve-look-up-left.webp'
 import { handleSevereError } from '@/composables/use-error.js'
 import { injectMinecraftAccounts } from '@/features/minecraft-accounts/context'
 import { trackEvent } from '@/helpers/analytics'
-import { login as loginFlow, set_default_user } from '@/helpers/auth.js'
+import { login as loginFlow, login_offline, set_default_user } from '@/helpers/auth.js'
 
 const { formatMessage } = useVIntl()
+const { handleError } = injectNotificationManager()
 const minecraftAccounts = injectMinecraftAccounts()
 
 const messages = defineMessages({
 	header: {
-		id: 'minecraft-required.header',
-		defaultMessage: 'Minecraft required',
+		id: 'minecraft-required.offline.header',
+		defaultMessage: 'Нужен ник',
 	},
 	descriptionHeader: {
-		id: 'minecraft-required.description-header',
-		defaultMessage: 'Sign in to a Microsoft account',
+		id: 'minecraft-required.offline.description-header',
+		defaultMessage: 'Введи ник, чтобы играть',
 	},
 	description: {
-		id: 'minecraft-required.description',
+		id: 'minecraft-required.offline.description',
 		defaultMessage:
-			'You need a Microsoft account that owns Minecraft before you can launch and play.',
+			'Аккаунт не нужен: играй по нику. Если у тебя есть лицензия, можно войти через Microsoft.',
 	},
-	getSupport: {
-		id: 'minecraft-required.get-support',
-		defaultMessage: 'Get support',
+	nicknamePlaceholder: {
+		id: 'minecraft-account.offline.nickname-placeholder',
+		defaultMessage: 'Ник',
+	},
+	playOffline: {
+		id: 'minecraft-account.offline.play',
+		defaultMessage: 'Играть по нику',
 	},
 	signIn: {
 		id: 'minecraft-required.sign-in',
 		defaultMessage: 'Sign in to Microsoft',
 	},
-	dontHaveAccount: {
-		id: 'minecraft-required.dont-have-account',
-		defaultMessage: 'Don’t have an account?',
-	},
-	getMinecraft: {
-		id: 'minecraft-required.get-minecraft',
-		defaultMessage: 'Get Minecraft',
-	},
 })
 
 const modal = ref<InstanceType<typeof NewModal>>()
 const loadingSignIn = ref(false)
+const offlineName = ref('')
+
+async function playOffline() {
+	if (!offlineName.value.trim()) return
+	loadingSignIn.value = true
+
+	try {
+		const loggedIn = await login_offline(offlineName.value)
+		await set_default_user(loggedIn.profile.id)
+		await minecraftAccounts.value?.refreshValues()
+		offlineName.value = ''
+		modal.value?.hide()
+	} catch (error) {
+		handleError(error)
+	} finally {
+		loadingSignIn.value = false
+	}
+}
 
 function show() {
 	modal.value?.show()

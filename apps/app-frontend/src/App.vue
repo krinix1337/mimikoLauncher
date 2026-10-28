@@ -309,10 +309,9 @@ const hasPlus = computed(
 		(hasMidasBadge(credentials.value.user) ||
 			hasActivePride26Midas(authenticatedModrinthUser.value?.campaigns?.pride_26)),
 )
-const showAd = computed(
-	() => sidebarVisible.value && !hasPlus.value && credentials.value !== undefined,
-)
-const adConsentAvailable = computed(() => credentials.value !== undefined && !hasPlus.value)
+// mimikoLauncher: no ads
+const showAd = computed(() => false)
+const adConsentAvailable = computed(() => false)
 providePageContext({
 	hierarchicalSidebarAvailable: ref(true),
 	showAds: showAd,
@@ -621,6 +620,7 @@ const messages = defineMessages({
 })
 
 function handleAdsConsentRequired(required) {
+	required = false // mimikoLauncher: no ads
 	if (!required) {
 		if (adsConsentPopupId !== null) {
 			popupNotificationManager.removeNotification(adsConsentPopupId)

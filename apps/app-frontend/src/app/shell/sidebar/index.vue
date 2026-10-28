@@ -4,11 +4,8 @@ import { OverlayScrollbars } from 'overlayscrollbars'
 import { computed, onMounted, onScopeDispose, ref } from 'vue'
 
 import { useTheme } from '@/composables/use-theme'
-import PrideFundraiserBanner from '@/features/campaigns/pride-fundraiser-banner.vue'
-import FriendsList from '@/features/friends/friends-list/index.vue'
 import AccountsCard from '@/features/minecraft-accounts/accounts-card.vue'
 import type { MinecraftAccountsActions } from '@/features/minecraft-accounts/context'
-import NewsSidebar from '@/features/news/news-sidebar.vue'
 import OnboardingChecklist from '@/features/onboarding/checklist.vue'
 import type { ModrinthCredentials } from '@/helpers/mr_auth'
 import { injectOnboardingChecklist } from '@/providers/onboarding-checklist'
@@ -30,10 +27,8 @@ const emit = defineEmits<{
 
 const { formatMessage } = useVIntl()
 const appTheme = useTheme()
-const { hasLoggedIntoMinecraft, hasLoggedIntoModrinth, showChecklist } = injectOnboardingChecklist()
-const showFriendsList = computed(() => !showChecklist.value || hasLoggedIntoModrinth.value)
+const { hasLoggedIntoMinecraft } = injectOnboardingChecklist()
 const accounts = ref<InstanceType<typeof AccountsCard> | null>(null)
-const friends = ref<InstanceType<typeof FriendsList> | null>(null)
 const scrollContainer = ref<HTMLElement | null>(null)
 const scrollViewport = ref<HTMLElement | null>(null)
 const upgradeHeight = ref(0)
@@ -66,9 +61,7 @@ const minecraftAccounts = computed<MinecraftAccountsActions | null>(() => {
 	}
 })
 
-function showAddFriendModal() {
-	friends.value?.showAddFriendModal()
-}
+function showAddFriendModal() {}
 
 defineExpose({ minecraftAccounts, showAddFriendModal })
 
@@ -123,22 +116,6 @@ const messages = defineMessages({
 							<AccountsCard ref="accounts" />
 						</Suspense>
 					</div>
-					<div
-						v-show="showFriendsList"
-						class="p-4 border-0 border-b-[1px] border-[--brand-gradient-border] border-solid"
-					>
-						<Suspense>
-							<FriendsList
-								ref="friends"
-								:credentials="credentials ?? null"
-								:sign-in="requestSignIn"
-							/>
-						</Suspense>
-					</div>
-					<PrideFundraiserBanner
-						class="p-4 border-0 border-b-[1px] border-[--brand-gradient-border] border-solid"
-					/>
-					<NewsSidebar :style="promotionPaddingStyle" />
 				</div>
 			</div>
 			<div
