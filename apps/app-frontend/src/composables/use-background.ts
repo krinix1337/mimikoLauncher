@@ -31,6 +31,8 @@ export interface BackgroundSettings {
 	rotate: boolean
 	/** Take the accent color from the background. */
 	accent: boolean
+	/** Blur radius of the frosted frame in pixels, used with advanced rendering. */
+	frameBlur: number
 }
 
 export interface BackgroundPreset {
@@ -103,6 +105,7 @@ const DEFAULTS: BackgroundSettings = {
 	everywhere: false,
 	rotate: true,
 	accent: false,
+	frameBlur: 28,
 }
 
 function readStored(): BackgroundSettings {

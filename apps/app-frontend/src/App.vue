@@ -185,11 +185,12 @@ const showBackground = computed(
 		(background.value.everywhere || route.path === '/'),
 )
 watch(
-	() => [showBackground.value, appTheme.advancedRendering],
-	([wallpaper, advanced]) => {
+	() => [showBackground.value, appTheme.advancedRendering, background.value.frameBlur],
+	([wallpaper, advanced, frameBlur]) => {
 		const root = document.body
 		root.classList.toggle('mimiko-wallpaper', wallpaper)
 		root.classList.toggle('mimiko-glass', wallpaper && advanced)
+		root.style.setProperty('--frame-blur', `${frameBlur ?? 28}px`)
 	},
 	{ immediate: true },
 )

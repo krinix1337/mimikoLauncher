@@ -48,6 +48,6 @@ body.mimiko-glass {
 	.app-grid-navbar,
 	.app-title-bar,
 	.app-sidebar {
-		backdrop-filter: blur(28px) saturate(1.6);
+		backdrop-filter: blur(var(--frame-blur, 28px)) saturate(1.6);
 	}
 }
