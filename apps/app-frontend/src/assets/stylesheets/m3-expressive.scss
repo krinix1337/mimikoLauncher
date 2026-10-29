@@ -186,10 +186,178 @@
 		border-radius: var(--md-shape-md);
 	}
 
-	/* Dialogs: extra large shape and surface container high, without the border. */
+	/* Dialogs: extra large shape, surface container high, and a spring when they open. */
 	.modal-body {
 		border-radius: var(--md-shape-xl) !important;
 		border-color: transparent !important;
 		background-color: var(--md-surface-container-high) !important;
+	}
+
+	.modal-container > .modal-body {
+		scale: 0.9;
+		transition:
+			opacity 0.2s var(--md-effects),
+			scale 0.45s var(--md-spatial),
+			visibility 0.2s;
+	}
+
+	.modal-container.shown > .modal-body {
+		scale: 1;
+	}
+
+	/* Switch: 52x32dp track; the thumb grows from 16dp to 24dp when selected and 28dp when pressed. */
+	button[role='switch'] {
+		position: relative;
+		width: 52px !important;
+		height: 32px !important;
+		padding: 0;
+		border: 2px solid var(--md-outline) !important;
+		background-color: var(--md-surface-container-highest) !important;
+		transition:
+			background-color 0.2s var(--md-effects),
+			border-color 0.2s var(--md-effects) !important;
+
+		&.h-5 {
+			zoom: 0.75;
+		}
+
+		> span {
+			position: absolute;
+			top: 6px;
+			left: 6px;
+			width: 16px !important;
+			height: 16px !important;
+			margin: 0 !important;
+			transform: none !important;
+			scale: 1 !important;
+			background-color: var(--md-outline) !important;
+			transition:
+				left 0.35s var(--md-spatial-fast),
+				top 0.35s var(--md-spatial-fast),
+				width 0.35s var(--md-spatial-fast),
+				height 0.35s var(--md-spatial-fast),
+				background-color 0.2s var(--md-effects),
+				box-shadow 0.2s var(--md-effects) !important;
+		}
+
+		&:not(:disabled):hover > span {
+			background-color: var(--md-on-surface-variant) !important;
+			box-shadow: 0 0 0 8px color-mix(in srgb, var(--md-on-surface) var(--md-state-hover), transparent);
+		}
+
+		&:not(:disabled):active > span {
+			top: 0;
+			left: 0;
+			width: 28px !important;
+			height: 28px !important;
+		}
+
+		&[aria-checked='true'],
+		&[aria-checked='mixed'] {
+			border-color: var(--md-primary) !important;
+			background-color: var(--md-primary) !important;
+
+			> span,
+			&:not(:disabled):hover > span {
+				top: 2px;
+				left: 22px;
+				width: 24px !important;
+				height: 24px !important;
+				background-color: var(--md-on-primary) !important;
+			}
+
+			&:not(:disabled):hover > span {
+				background-color: var(--md-primary-container) !important;
+				box-shadow: 0 0 0 4px color-mix(in srgb, var(--md-primary) var(--md-state-hover), transparent);
+			}
+
+			&:not(:disabled):active > span {
+				top: 0;
+				left: 20px;
+				width: 28px !important;
+				height: 28px !important;
+			}
+		}
+
+		&:focus-visible {
+			outline: 3px solid var(--md-secondary);
+			outline-offset: 2px;
+		}
+	}
+
+	/* Checkbox: 18dp box with 2dp corners and a round state layer. */
+	.checkbox-outer > span:first-child {
+		width: 18px;
+		height: 18px;
+		margin: 1px;
+		border-radius: 2px;
+		border-width: 2px;
+		border-color: var(--md-on-surface-variant);
+		background-color: transparent;
+		box-shadow: none;
+		transition:
+			background-color 0.15s var(--md-effects),
+			border-color 0.15s var(--md-effects),
+			box-shadow 0.15s var(--md-effects);
+
+		&.bg-brand {
+			border-color: var(--md-primary);
+			background-color: var(--md-primary);
+			color: var(--md-on-primary);
+		}
+
+		> svg {
+			animation: m3-check-in 0.3s var(--md-spatial-fast);
+		}
+	}
+
+	.checkbox-outer:not(:disabled):hover > span:first-child {
+		box-shadow: 0 0 0 11px color-mix(in srgb, var(--md-on-surface) var(--md-state-hover), transparent);
+	}
+
+	/* Tabs: the selected indicator travels with the expressive spatial spring. */
+	.navtabs-transition {
+		transition-duration: 0.4s !important;
+		transition-timing-function: var(--md-spatial) !important;
+	}
+
+	/* Progress: rounded M3 track with the active part in primary. */
+	progress,
+	.progress-bar {
+		border-radius: 9999px;
+		accent-color: var(--md-primary);
+	}
+
+	/* Menus and popovers: medium shape and surface container. */
+	.v-popper__inner,
+	[role='menu'] {
+		border-radius: var(--md-shape-lg) !important;
+	}
+
+	/* Pages fade and rise slightly when they change. */
+	.app-viewport > * {
+		animation: m3-page-in 0.35s var(--md-effects);
+	}
+
+	@media (prefers-reduced-motion) {
+		*,
+		*::before {
+			animation: none !important;
+			transition-duration: 0s !important;
+		}
+	}
+}
+
+@keyframes m3-check-in {
+	from {
+		scale: 0.3;
+		opacity: 0;
+	}
+}
+
+@keyframes m3-page-in {
+	from {
+		opacity: 0;
+		translate: 0 12px;
 	}
 }
