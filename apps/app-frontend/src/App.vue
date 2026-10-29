@@ -184,6 +184,15 @@ const showBackground = computed(
 		background.value.source.kind !== 'none' &&
 		(background.value.everywhere || route.path === '/'),
 )
+watch(
+	() => [showBackground.value, appTheme.advancedRendering],
+	([wallpaper, advanced]) => {
+		const root = document.body
+		root.classList.toggle('mimiko-wallpaper', wallpaper)
+		root.classList.toggle('mimiko-glass', wallpaper && advanced)
+	},
+	{ immediate: true },
+)
 const { channel: appEventChannel, events: appEvents } = setupAppEventsProvider()
 useInstanceMetadataRefresh(appEvents)
 const breadcrumbManager = createBreadcrumbManager()
@@ -1845,6 +1854,16 @@ provideAppUpdateDownloadProgress(appUpdateDownload)
 	<SplashScreen v-if="!stateFailed" ref="splashScreen" data-tauri-drag-region />
 	<div id="teleports"></div>
 	<AccountSwitchOverlay :show="isSwitchingAccount" />
+	<Transition name="fade">
+		<div v-if="stateInitialized && showBackground" class="app-wallpaper">
+			<AppBackground
+				:source="background.source"
+				:dim="background.dim"
+				:blur="background.blur"
+				:rotate="background.rotate"
+			/>
+		</div>
+	</Transition>
 	<div
 		v-if="stateInitialized"
 		class="app-grid-layout relative"
@@ -1974,15 +1993,6 @@ provideAppUpdateDownloadProgress(appUpdateDownload)
 			'disable-advanced-rendering': !appTheme.advancedRendering,
 		}"
 	>
-		<Transition name="fade">
-			<AppBackground
-				v-if="showBackground"
-				:source="background.source"
-				:dim="background.dim"
-				:blur="background.blur"
-				:rotate="background.rotate"
-			/>
-		</Transition>
 		<div class="app-viewport flex-grow router-view">
 			<div
 				class="loading-indicator-container h-8 fixed z-50 pointer-events-none"

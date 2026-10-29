@@ -1,0 +1,53 @@
+// The launcher frame over a background image: the title bar, the navigation rail and the right
+// panel let the background through, frosted when advanced rendering is on.
+
+.app-wallpaper {
+	position: fixed;
+	inset: 0;
+	z-index: 0;
+	pointer-events: none;
+
+	.app-background {
+		border-radius: 0 !important;
+	}
+}
+
+body.mimiko-wallpaper {
+	--frame-tint: color-mix(in srgb, var(--color-raised-bg) 62%, transparent);
+
+	.app-grid-layout,
+	.app-contents {
+		background: transparent !important;
+	}
+
+	.app-grid-navbar,
+	.app-title-bar,
+	.app-sidebar {
+		background: var(--frame-tint) !important;
+	}
+
+	.sidebar-scroll-fade {
+		display: none;
+	}
+
+	.app-viewport {
+		--color-raised-bg: color-mix(in srgb, var(--color-bg) 58%, transparent);
+		--color-button-bg: color-mix(in srgb, var(--color-bg) 52%, transparent);
+		--surface-2: color-mix(in srgb, var(--color-bg) 52%, transparent);
+		--surface-3: color-mix(in srgb, var(--color-bg) 58%, transparent);
+		--surface-4: color-mix(in srgb, var(--color-bg) 64%, transparent);
+		--md-surface-container-low: color-mix(in srgb, var(--color-bg) 58%, transparent);
+		--md-surface-container: color-mix(in srgb, var(--color-bg) 60%, transparent);
+		--md-surface-container-high: color-mix(in srgb, var(--color-bg) 64%, transparent);
+	}
+}
+
+body.mimiko-glass {
+	--frame-tint: color-mix(in srgb, var(--color-raised-bg) 38%, transparent);
+
+	.app-grid-navbar,
+	.app-title-bar,
+	.app-sidebar {
+		backdrop-filter: blur(28px) saturate(1.6);
+	}
+}
