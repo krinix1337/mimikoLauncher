@@ -26,16 +26,23 @@ function update() {
 		rect.height / 2,
 	)
 	const { left, top, right, bottom } = rect
+	const hasRightPanel = right < width - 1
+	const rightRadius = hasRightPanel ? radius : 0
+	document.body.style.setProperty('--page-radius-right', `${rightRadius}px`)
 	outline.value = {
 		left: `${left}px`,
 		top: `${top}px`,
 		width: `${right - left}px`,
 		height: `${bottom - top}px`,
 		borderTopLeftRadius: `${radius}px`,
+		borderTopRightRadius: `${rightRadius}px`,
+		borderRightStyle: hasRightPanel ? 'solid' : 'none',
 	}
 	clipPath.value =
 		`path(evenodd, 'M0 0H${width}V${height}H0Z ` +
-		`M${left + radius} ${top}H${right}V${bottom}H${left}V${top + radius}` +
+		`M${left + radius} ${top}H${right - rightRadius}` +
+		`A${rightRadius} ${rightRadius} 0 0 1 ${right} ${top + rightRadius}` +
+		`V${bottom}H${left}V${top + radius}` +
 		`A${radius} ${radius} 0 0 1 ${left + radius} ${top}Z')`
 }
 
@@ -59,11 +66,11 @@ useMutationObserver(
 	position: absolute;
 	box-sizing: border-box;
 	border: 1px solid color-mix(in srgb, #fff 12%, transparent);
-	border-right: none;
 	border-bottom: none;
 	box-shadow:
 		inset 0 10px 18px -10px rgb(0 0 0 / 0.4),
-		inset 10px 0 18px -10px rgb(0 0 0 / 0.4);
+		inset 10px 0 18px -10px rgb(0 0 0 / 0.4),
+		inset -10px 0 18px -10px rgb(0 0 0 / 0.4);
 }
 
 .frame-glass {

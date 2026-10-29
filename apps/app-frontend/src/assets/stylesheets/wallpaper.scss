@@ -31,6 +31,11 @@ body.mimiko-wallpaper {
 		display: none;
 	}
 
+	.app-viewport {
+		border-top-left-radius: var(--radius-xl);
+		border-top-right-radius: var(--page-radius-right, 0);
+	}
+
 	.app-sidebar {
 		border-left-color: transparent !important;
 	}
