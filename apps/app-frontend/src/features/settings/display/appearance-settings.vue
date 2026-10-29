@@ -4,12 +4,14 @@ import {
 	injectAuth,
 	injectUserPreferences,
 	provideAppearanceSettings,
+	Toggle,
 	useSavable,
 } from '@modrinth/ui'
 import { platform } from '@tauri-apps/plugin-os'
 import { computed, onBeforeUnmount, onMounted, watch } from 'vue'
 
 import { useAppSettings } from '@/composables/use-app-settings.ts'
+import { useNavLabels } from '@/composables/use-nav-labels.ts'
 import { type ColorTheme, isDarkTheme, useTheme } from '@/composables/use-theme.ts'
 import { injectAppSettingsModal } from '@/features/settings/app-settings-modal/context'
 import { type AppSettings, get, set } from '@/helpers/settings.ts'
@@ -20,6 +22,7 @@ const auth = injectAuth()
 const { updatePreferences } = injectUserPreferences()
 const settingsModal = injectAppSettingsModal()
 const os = platform()
+const showNavLabels = useNavLabels()
 
 type AppearanceSettingsState = {
 	theme: ColorTheme
@@ -159,4 +162,13 @@ provideAppearanceSettings({
 
 <template>
 	<AppearanceSettingsLayout />
+	<div class="mt-6 flex items-center justify-between gap-4">
+		<div>
+			<h2 class="m-0 text-lg font-semibold text-contrast">Подписи в боковой панели</h2>
+			<p class="m-0 mt-1 text-secondary">
+				Показывать названия под иконками слева. Работает в темах Material 3.
+			</p>
+		</div>
+		<Toggle id="nav-labels" v-model="showNavLabels" />
+	</div>
 </template>

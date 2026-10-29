@@ -44,6 +44,10 @@
 		--left-bar-width: 6rem;
 	}
 
+	body:not(:has(.nav-button__label)) :is(.app-grid-layout, .app-contents) {
+		--left-bar-width: 5rem;
+	}
+
 	/* Buttons: full round shape, M3 padding for each height, state layers and pressed morph. */
 	[data-button] {
 		border-radius: 9999px !important;

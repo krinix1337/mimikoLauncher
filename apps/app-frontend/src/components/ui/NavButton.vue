@@ -14,7 +14,7 @@
 		@click="onClick"
 	>
 		<slot />
-		<span v-if="label" class="nav-button__label">{{ label }}</span>
+		<span v-if="label && showNavLabels" class="nav-button__label">{{ label }}</span>
 	</component>
 </template>
 
@@ -23,7 +23,10 @@ import { computed } from 'vue'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
 import { RouterLink, useRoute } from 'vue-router'
 
+import { useNavLabels } from '@/composables/use-nav-labels.ts'
+
 const route = useRoute()
+const showNavLabels = useNavLabels()
 
 type RouteFunction = (route: RouteLocationNormalizedLoaded) => boolean
 
