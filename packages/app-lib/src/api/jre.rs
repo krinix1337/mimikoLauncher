@@ -136,12 +136,6 @@ async fn auto_install_java_inner(
         None
     };
 
-    #[derive(Deserialize)]
-    struct Package {
-        pub download_url: String,
-        pub name: PathBuf,
-    }
-
     if let Some(loading_bar) = &loading_bar {
         emit_loading(loading_bar, 0.0, Some("Fetching java version"))?;
     }
@@ -152,6 +146,8 @@ async fn auto_install_java_inner(
         Some(java_step_progress(1)),
     )
     .await?;
+    let adoptium_packages =
+        fetch_adoptium_packages(java_version, &state).await;
     let metadata_url = format!(
         "https://api.azul.com/metadata/v1/zulu/packages?arch={}&java_version={}&os={}&archive_type=zip&javafx_bundled=false&java_package_type=jre&page_size=1",
         std::env::consts::ARCH,
@@ -170,16 +166,21 @@ async fn auto_install_java_inner(
             )
             .await?;
     }
-    let packages = fetch_json::<Vec<Package>>(
-        Method::GET,
-        &metadata_url,
-        None,
-        None,
-        None,
-        &state.fetch_semaphore,
-        &state.pool,
-    )
-    .await?;
+    let packages = match adoptium_packages {
+        Some(packages) => packages,
+        None => {
+            fetch_json::<Vec<Package>>(
+                Method::GET,
+                &metadata_url,
+                None,
+                None,
+                None,
+                &state.fetch_semaphore,
+                &state.pool,
+            )
+            .await?
+        }
+    };
     if let Some(loading_bar) = &loading_bar {
         emit_loading(loading_bar, 10.0, Some("Downloading java version"))?;
     }
@@ -290,10 +291,12 @@ async fn auto_install_java_inner(
             ))?;
 
         let names = archive.file_names().collect::<Result<Vec<_>, _>>()?;
+        let mut archive_root = None;
         // removes the old installation of java
         if let Some(file) = names.first()
             && let Some(dir) = file.split('/').next()
         {
+            archive_root = Some(dir.to_string());
             if dir.is_empty()
                 || dir == "."
                 || dir == ".."
@@ -344,14 +347,14 @@ async fn auto_install_java_inner(
         if let Some(loading_bar) = &loading_bar {
             emit_loading(loading_bar, 10.0, Some("Done extracting java"))?;
         }
-        let mut base_path = path.join(
+        let mut base_path = path.join(archive_root.unwrap_or_else(|| {
             download
                 .name
                 .file_stem()
                 .unwrap_or_default()
                 .to_string_lossy()
-                .to_string(),
-        );
+                .to_string()
+        }));
 
         #[cfg(target_os = "macos")]
         {
@@ -376,6 +379,75 @@ async fn auto_install_java_inner(
             std::env::consts::ARCH,
         )))
     }
+}
+
+#[derive(Deserialize)]
+struct Package {
+    pub download_url: String,
+    pub name: PathBuf,
+}
+
+#[derive(Deserialize)]
+struct AdoptiumAsset {
+    binary: AdoptiumBinary,
+}
+
+#[derive(Deserialize)]
+struct AdoptiumBinary {
+    package: AdoptiumPackage,
+}
+
+#[derive(Deserialize)]
+struct AdoptiumPackage {
+    link: String,
+    name: String,
+}
+
+/// Looks up the latest Eclipse Adoptium (Temurin) JRE zip for this system.
+/// Returns `None` when Adoptium has no zip build for it or cannot be reached,
+/// so the caller can fall back to another vendor.
+async fn fetch_adoptium_packages(
+    java_version: u32,
+    state: &State,
+) -> Option<Vec<Package>> {
+    let os = match std::env::consts::OS {
+        "windows" => "windows",
+        _ => return None,
+    };
+    let arch = match std::env::consts::ARCH {
+        "x86_64" => "x64",
+        "aarch64" => "aarch64",
+        "x86" => "x32",
+        _ => return None,
+    };
+    let url = format!(
+        "https://api.adoptium.net/v3/assets/latest/{java_version}/hotspot?architecture={arch}&image_type=jre&os={os}&vendor=eclipse"
+    );
+
+    let assets = fetch_json::<Vec<AdoptiumAsset>>(
+        Method::GET,
+        &url,
+        None,
+        None,
+        None,
+        &state.fetch_semaphore,
+        &state.pool,
+    )
+    .await
+    .inspect_err(|err| {
+        tracing::warn!("Adoptium lookup for Java {java_version} failed: {err}")
+    })
+    .ok()?;
+
+    let packages: Vec<Package> = assets
+        .into_iter()
+        .filter(|asset| asset.binary.package.name.ends_with(".zip"))
+        .map(|asset| Package {
+            download_url: asset.binary.package.link,
+            name: PathBuf::from(asset.binary.package.name),
+        })
+        .collect();
+    (!packages.is_empty()).then_some(packages)
 }
 
 // Validates JRE at a given at a given path
