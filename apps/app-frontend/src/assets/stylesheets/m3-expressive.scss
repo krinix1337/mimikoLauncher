@@ -1,71 +1,114 @@
 /**
- * Material 3 Expressive look for the `m3` and `m3_light` themes.
+ * Material 3 Expressive look for the `m3` and `m3_light` themes, following https://m3.material.io.
  *
  * Colors come from the role palette in `packages/assets/styles/variables.scss`. This file adds the
- * parts of M3 Expressive that are not colors: the corner radius scale, the spring-like motion
- * curves from https://m3.material.io/styles/motion/overview/specs, pill shaped buttons that morph
- * when pressed, and the navigation rail indicator.
+ * rest of the system: Roboto Flex with the M3 weights, the corner radius scale, state layers instead
+ * of brightness changes, buttons with M3 colors, padding and pressed shape morph, and a navigation
+ * rail wide enough for the 56x32dp active indicator. Component sizes are kept, so nothing reflows.
  */
 :is(html.m3-mode, html.m3_light-mode) {
-	/* Motion: web conversion of the Expressive motion physics springs. */
 	--md-spatial-fast: cubic-bezier(0.42, 1.67, 0.21, 0.9);
 	--md-spatial: cubic-bezier(0.38, 1.21, 0.22, 1);
-	--md-spatial-slow: cubic-bezier(0.39, 1.29, 0.35, 0.98);
-	--md-effects-fast: cubic-bezier(0.31, 0.94, 0.34, 1);
 	--md-effects: cubic-bezier(0.34, 0.8, 0.34, 1);
-	--md-effects-slow: cubic-bezier(0.34, 0.88, 0.34, 1);
 
-	/* Shape: the M3 corner radius scale. */
 	--md-shape-xs: 4px;
 	--md-shape-sm: 8px;
 	--md-shape-md: 12px;
 	--md-shape-lg: 16px;
-	--md-shape-lg-increased: 20px;
 	--md-shape-xl: 28px;
-	--md-shape-xl-increased: 32px;
-	--md-shape-xxl: 48px;
+
+	--md-state-hover: 8%;
+	--md-state-pressed: 10%;
+
 	--radius-xs: var(--md-shape-xs);
 	--radius-sm: var(--md-shape-sm);
 	--radius-md: var(--md-shape-md);
 	--radius-lg: var(--md-shape-lg);
-	--radius-xl: var(--md-shape-xl);
+	--radius-xl: var(--md-shape-lg);
 
-	font-family:
-		'Roboto Flex Variable', 'Roboto Flex', Roboto, 'Segoe UI Variable', system-ui, sans-serif;
-
-	.rounded-lg {
-		border-radius: var(--md-shape-md);
+	body {
+		--font-standard: 'Roboto Flex Variable', 'Roboto Flex', Roboto, 'Segoe UI', sans-serif;
+		--font-weight-text: var(--font-weight-medium);
+		--font-weight-heading: 600;
+		--font-weight-title: 600;
+		--hover-brightness: 1;
+		letter-spacing: 0.01em;
 	}
 
-	.rounded-xl {
-		border-radius: var(--md-shape-lg);
+	.font-extrabold {
+		font-weight: 700;
 	}
 
-	.rounded-2xl {
-		border-radius: var(--md-shape-xl);
+	.app-grid-layout,
+	.app-contents {
+		--left-bar-width: 5rem;
 	}
 
-	.rounded-3xl {
-		border-radius: var(--md-shape-xl-increased);
-	}
-
-	/* Buttons are fully rounded and morph to a squarer shape while pressed. */
+	/* Buttons: full round shape, M3 padding for each height, state layers and pressed morph. */
 	[data-button] {
 		border-radius: 9999px !important;
 		box-shadow: none !important;
 		transition:
-			border-radius 0.35s var(--md-spatial-fast),
+			border-radius 0.3s var(--md-spatial-fast),
 			background-color 0.2s var(--md-effects),
-			color 0.2s var(--md-effects),
-			filter 0.2s var(--md-effects),
-			box-shadow 0.2s var(--md-effects);
+			color 0.2s var(--md-effects) !important;
 
 		&:active:not(:disabled):not([aria-disabled='true']) {
+			scale: 1;
+			transform: none;
+		}
+
+		&:not(:disabled):not([aria-disabled='true']) {
+			&:hover {
+				background-image: linear-gradient(
+					color-mix(in srgb, currentColor var(--md-state-hover), transparent) 0 0
+				);
+			}
+
+			&:active {
+				background-image: linear-gradient(
+					color-mix(in srgb, currentColor var(--md-state-pressed), transparent) 0 0
+				);
+			}
+		}
+
+		&:focus-visible {
+			--tw-ring-shadow: 0 0 #0000 !important;
+			outline: 3px solid var(--md-secondary) !important;
+			outline-offset: 2px;
+		}
+
+		&.h-7:not([class*='!px-0']) {
+			padding-inline: 0.625rem;
+		}
+
+		&.h-8:not([class*='!px-0']) {
+			padding-inline: 0.75rem;
+		}
+
+		&.h-9:not([class*='!px-0']) {
+			padding-inline: 0.875rem;
+		}
+
+		&.h-10:not([class*='!px-0']) {
+			padding-inline: 1rem;
+		}
+
+		&.h-12:not([class*='!px-0']) {
+			padding-inline: 1.25rem;
+		}
+
+		&:is(.h-7, .h-8, .h-9):active:not(:disabled):not([aria-disabled='true']) {
+			border-radius: var(--md-shape-sm) !important;
+		}
+
+		&:is(.h-10, .h-12):active:not(:disabled):not([aria-disabled='true']) {
 			border-radius: var(--md-shape-md) !important;
 		}
 	}
 
-	.button-frame--base {
+	.button-frame--base,
+	.button-frame--colored-text {
 		background-color: var(--md-secondary-container) !important;
 		color: var(--md-on-secondary-container) !important;
 
@@ -74,35 +117,79 @@
 		}
 	}
 
+	.button-frame--colored-text {
+		color: var(--button-color) !important;
+	}
+
 	.button-frame--colored::before {
 		display: none;
 	}
 
 	.button-frame--outlined {
-		box-shadow: inset 0 0 0 1px var(--md-outline) !important;
+		box-shadow: inset 0 0 0 1px var(--md-outline-variant) !important;
+		color: var(--button-color, var(--md-on-surface-variant));
 	}
 
-	/* Navigation rail: pill shaped active indicator. */
+	/* Navigation rail: 56x32dp pill indicator centered in an 80dp rail. */
 	.app-grid-navbar {
+		align-items: center;
 		gap: 0.75rem;
-		background-color: var(--md-surface);
+		padding-top: 0.25rem;
+		background-color: var(--md-surface-container);
+
+		> hr,
+		> div:not(:has(.nav-button)) {
+			align-self: stretch;
+		}
 	}
 
 	.nav-button {
 		width: 3.5rem !important;
 		height: 2rem !important;
-		margin-inline: auto;
-		border-radius: var(--md-shape-lg) !important;
+		border-radius: 9999px !important;
+		color: var(--md-on-surface-variant);
+
+		&:hover {
+			background-color: transparent !important;
+			background-image: linear-gradient(
+				color-mix(in srgb, var(--md-on-surface) var(--md-state-hover), transparent) 0 0
+			);
+		}
 
 		&::before {
-			border-radius: var(--md-shape-lg) !important;
+			border-radius: 9999px !important;
+			background-color: var(--md-secondary-container) !important;
 			transition:
 				opacity 0.2s var(--md-effects),
 				scale 0.35s var(--md-spatial-fast) !important;
 		}
+
+		&.router-link-active {
+			color: var(--md-on-secondary-container) !important;
+
+			svg {
+				filter: none;
+			}
+		}
+
+		&.subpage-active {
+			background-color: var(--md-surface-container-highest) !important;
+			color: var(--md-on-surface) !important;
+
+			svg {
+				filter: none;
+			}
+		}
 	}
 
 	.card {
-		border-radius: var(--md-shape-lg);
+		border-radius: var(--md-shape-md);
+	}
+
+	/* Dialogs: extra large shape and surface container high, without the border. */
+	.modal-body {
+		border-radius: var(--md-shape-xl) !important;
+		border-color: transparent !important;
+		background-color: var(--md-surface-container-high) !important;
 	}
 }

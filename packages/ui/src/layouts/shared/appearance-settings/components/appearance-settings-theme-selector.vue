@@ -40,11 +40,11 @@ const themeLabels = defineMessages({
 	},
 	m3: {
 		id: 'settings.display.theme.m3',
-		defaultMessage: 'Material 3 Expressive',
+		defaultMessage: 'Material 3',
 	},
 	m3_light: {
 		id: 'settings.display.theme.m3-light',
-		defaultMessage: 'Material 3 Expressive (light)',
+		defaultMessage: 'Material 3 светлая',
 	},
 })
 
