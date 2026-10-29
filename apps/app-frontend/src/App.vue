@@ -63,7 +63,9 @@ import InstallToPlayModal from '@/components/ui/modal/InstallToPlayModal.vue'
 import ModpackAlreadyInstalledModal from '@/components/ui/modal/ModpackAlreadyInstalledModal.vue'
 import ModrinthAccountRequiredModal from '@/components/ui/modal/ModrinthAccountRequiredModal.vue'
 import UpdateToPlayModal from '@/components/ui/modal/UpdateToPlayModal.vue'
+import AppBackground from '@/components/ui/AppBackground.vue'
 import NavButton from '@/components/ui/NavButton.vue'
+import { useBackground } from '@/composables/use-background'
 import QuickInstanceSwitcher from '@/components/ui/QuickInstanceSwitcher.vue'
 import SharedInstanceInviteHandler from '@/components/ui/shared-instances/shared-instance-invite-handler/index.vue'
 import SplashScreen from '@/components/ui/SplashScreen.vue'
@@ -176,6 +178,12 @@ const appTheme = useTheme()
 const quickInstances = useQuickInstanceLimit()
 const router = useRouter()
 const route = useRoute()
+const background = useBackground()
+const showBackground = computed(
+	() =>
+		background.value.source.kind !== 'none' &&
+		(background.value.everywhere || route.path === '/'),
+)
 const { channel: appEventChannel, events: appEvents } = setupAppEventsProvider()
 useInstanceMetadataRefresh(appEvents)
 const breadcrumbManager = createBreadcrumbManager()
@@ -1966,6 +1974,15 @@ provideAppUpdateDownloadProgress(appUpdateDownload)
 			'disable-advanced-rendering': !appTheme.advancedRendering,
 		}"
 	>
+		<Transition name="fade">
+			<AppBackground
+				v-if="showBackground"
+				:source="background.source"
+				:dim="background.dim"
+				:blur="background.blur"
+				:rotate="background.rotate"
+			/>
+		</Transition>
 		<div class="app-viewport flex-grow router-view">
 			<div
 				class="loading-indicator-container h-8 fixed z-50 pointer-events-none"

@@ -52,6 +52,9 @@ pub fn init<R: Runtime>() -> tauri::plugin::TauriPlugin<R> {
             progress_bars_list,
             get_opening_command,
             super::thumbnails::get_image_thumbnail,
+            super::backgrounds::background_panorama,
+            super::backgrounds::background_import,
+            super::backgrounds::background_custom_url,
         ])
         .build()
 }

@@ -388,6 +388,9 @@ fn main() {
                         "progress_bars_list",
                         "get_opening_command",
                         "get_image_thumbnail",
+                        "background_panorama",
+                        "background_import",
+                        "background_custom_url",
                     ])
                     .default_permission(
                         DefaultPermissionRule::AllowAllCommands,

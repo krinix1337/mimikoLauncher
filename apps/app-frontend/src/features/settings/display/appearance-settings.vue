@@ -4,13 +4,24 @@ import {
 	injectAuth,
 	injectUserPreferences,
 	provideAppearanceSettings,
+	Slider,
 	Toggle,
 	useSavable,
 } from '@modrinth/ui'
+import { open } from '@tauri-apps/plugin-dialog'
 import { platform } from '@tauri-apps/plugin-os'
-import { computed, onBeforeUnmount, onMounted, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 import { useAppSettings } from '@/composables/use-app-settings.ts'
+import {
+	BACKGROUND_PRESETS,
+	type BackgroundSource,
+	getCustomBackgroundUrl,
+	getPanorama,
+	importBackground,
+	PANORAMA_PRESETS,
+	useBackground,
+} from '@/composables/use-background.ts'
 import {
 	M3_PRESETS,
 	type M3Palette,
@@ -41,6 +52,57 @@ function isSelected(palette: M3Palette): boolean {
 }
 
 const isCustom = computed(() => !M3_PRESETS.some((preset) => isSelected(preset.palette)))
+
+const background = useBackground()
+const customPreview = ref<string | null>(null)
+const importing = ref(false)
+const downloadingPanorama = ref<string | null>(null)
+const panoramaError = ref<string | null>(null)
+
+function isBackground(source: BackgroundSource): boolean {
+	return JSON.stringify(background.value.source) === JSON.stringify(source)
+}
+
+function setBackground(source: BackgroundSource) {
+	background.value.source = source
+}
+
+async function selectPanorama(id: string) {
+	if (downloadingPanorama.value) return
+	downloadingPanorama.value = id
+	panoramaError.value = null
+	try {
+		await getPanorama(id)
+		setBackground({ kind: 'panorama', id })
+	} catch {
+		panoramaError.value = 'Не удалось скачать панораму. Проверь подключение к интернету.'
+	} finally {
+		downloadingPanorama.value = null
+	}
+}
+
+async function refreshCustomPreview() {
+	const source = background.value.source
+	customPreview.value =
+		source.kind === 'custom' ? await getCustomBackgroundUrl(source.name).catch(() => null) : null
+}
+
+async function pickCustomBackground() {
+	const path = await open({
+		multiple: false,
+		directory: false,
+		filters: [{ name: 'Изображения', extensions: ['png', 'jpg', 'jpeg', 'webp', 'gif'] }],
+	})
+	if (typeof path !== 'string') return
+	importing.value = true
+	try {
+		setBackground({ kind: 'custom', name: await importBackground(path) })
+	} finally {
+		importing.value = false
+	}
+}
+
+watch(() => background.value.source, refreshCustomPreview, { immediate: true })
 
 type AppearanceSettingsState = {
 	theme: ColorTheme
@@ -208,6 +270,106 @@ provideAppearanceSettings({
 			</label>
 		</div>
 	</div>
+	<div class="mt-6">
+		<h2 class="m-0 text-lg font-semibold text-contrast">Фон</h2>
+		<p class="m-0 mt-1 text-secondary">
+			Картинка или вращающаяся панорама из главного меню Minecraft за страницами лаунчера.
+		</p>
+		<div class="bg-grid mt-3">
+			<button
+				type="button"
+				class="bg-tile bg-tile--none"
+				:class="{ 'bg-tile--selected': isBackground({ kind: 'none' }) }"
+				@click="setBackground({ kind: 'none' })"
+			>
+				<span class="bg-tile__label">Без фона</span>
+			</button>
+			<button
+				v-for="preset in BACKGROUND_PRESETS"
+				:key="preset.id"
+				v-tooltip="`${preset.name} · фото ${preset.author}, Unsplash`"
+				type="button"
+				class="bg-tile"
+				:class="{ 'bg-tile--selected': isBackground({ kind: 'preset', id: preset.id }) }"
+				:aria-label="preset.name"
+				@click="setBackground({ kind: 'preset', id: preset.id })"
+			>
+				<img :src="preset.url" alt="" loading="lazy" draggable="false" />
+			</button>
+			<button
+				v-if="customPreview"
+				type="button"
+				class="bg-tile bg-tile--selected"
+				aria-label="Своё изображение"
+			>
+				<img :src="customPreview" alt="" draggable="false" />
+				<span class="bg-tile__badge">Своё</span>
+			</button>
+			<button
+				type="button"
+				class="bg-tile bg-tile--add"
+				:disabled="importing"
+				@click="pickCustomBackground"
+			>
+				<span class="bg-tile__label">{{ importing ? 'Загрузка…' : '+ Своё изображение' }}</span>
+			</button>
+		</div>
+
+		<h3 class="m-0 mt-5 text-base font-semibold text-contrast">Панорамы Minecraft</h3>
+		<p class="m-0 mt-1 text-secondary">
+			Все панорамы главного меню Java Edition без повторов. Скачиваются с серверов Mojang при
+			первом выборе.
+		</p>
+		<div class="bg-grid mt-3">
+			<button
+				v-for="panorama in PANORAMA_PRESETS"
+				:key="panorama.id"
+				v-tooltip="`${panorama.name} · ${panorama.versions}`"
+				type="button"
+				class="bg-tile"
+				:class="{
+					'bg-tile--selected': isBackground({ kind: 'panorama', id: panorama.id }),
+					'bg-tile--loading': downloadingPanorama === panorama.id,
+				}"
+				:disabled="downloadingPanorama !== null"
+				:aria-label="panorama.name"
+				@click="selectPanorama(panorama.id)"
+			>
+				<img :src="panorama.preview" alt="" loading="lazy" draggable="false" />
+				<span class="bg-tile__badge">{{ panorama.versions }}</span>
+				<span v-if="downloadingPanorama === panorama.id" class="bg-tile__spinner" />
+			</button>
+		</div>
+		<p v-if="panoramaError" class="m-0 mt-2 text-red">{{ panoramaError }}</p>
+
+		<template v-if="background.source.kind !== 'none'">
+			<div class="mt-5 flex flex-col gap-2.5">
+				<h3 class="m-0 text-base font-semibold text-contrast">Затемнение</h3>
+				<Slider id="background-dim" v-model="background.dim" :min="0" :max="90" :step="5" unit="%" />
+			</div>
+			<div class="mt-4 flex flex-col gap-2.5">
+				<h3 class="m-0 text-base font-semibold text-contrast">Размытие</h3>
+				<Slider id="background-blur" v-model="background.blur" :min="0" :max="24" :step="1" unit="px" />
+			</div>
+			<div class="mt-4 flex items-center justify-between gap-4">
+				<div>
+					<h3 class="m-0 text-base font-semibold text-contrast">На всех страницах</h3>
+					<p class="m-0 mt-1 text-secondary">Иначе фон виден только на главной.</p>
+				</div>
+				<Toggle id="background-everywhere" v-model="background.everywhere" />
+			</div>
+			<div
+				v-if="background.source.kind === 'panorama'"
+				class="mt-4 flex items-center justify-between gap-4"
+			>
+				<div>
+					<h3 class="m-0 text-base font-semibold text-contrast">Вращать панораму</h3>
+					<p class="m-0 mt-1 text-secondary">Медленный поворот камеры, как в игре.</p>
+				</div>
+				<Toggle id="background-rotate" v-model="background.rotate" />
+			</div>
+		</template>
+	</div>
 	<div class="mt-6 flex items-center justify-between gap-4">
 		<div>
 			<h2 class="m-0 text-lg font-semibold text-contrast">Подписи в боковой панели</h2>
@@ -246,6 +408,101 @@ provideAppearanceSettings({
 	box-shadow:
 		0 0 0 2px var(--color-bg),
 		0 0 0 4px var(--color-contrast);
+}
+
+.bg-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+	gap: 0.5rem;
+}
+
+.bg-tile {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	aspect-ratio: 16 / 9;
+	overflow: hidden;
+	padding: 0;
+	border: none;
+	border-radius: 12px;
+	background: var(--color-button-bg);
+	color: var(--color-text-primary);
+	cursor: pointer;
+	outline: 2px solid transparent;
+	outline-offset: 2px;
+	transition:
+		border-radius 0.3s cubic-bezier(0.34, 0.8, 0.34, 1),
+		outline-color 0.2s cubic-bezier(0.34, 0.8, 0.34, 1);
+
+	img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		transition: transform 0.4s cubic-bezier(0.34, 0.8, 0.34, 1);
+	}
+
+	&:hover img {
+		transform: scale(1.06);
+	}
+
+	&:disabled {
+		cursor: progress;
+		opacity: 0.6;
+	}
+}
+
+.bg-tile--selected {
+	border-radius: 20px;
+	outline-color: var(--color-brand);
+}
+
+.bg-tile--add {
+	border: 2px dashed var(--color-divider);
+}
+
+.bg-tile__label {
+	padding: 0 0.5rem;
+	font-size: 0.875rem;
+	font-weight: 600;
+	text-align: center;
+}
+
+.bg-tile:disabled:not(.bg-tile--loading) {
+	cursor: default;
+	opacity: 1;
+}
+
+.bg-tile--loading img {
+	filter: brightness(0.5);
+}
+
+.bg-tile__spinner {
+	position: absolute;
+	width: 1.75rem;
+	height: 1.75rem;
+	border: 3px solid rgb(255 255 255 / 0.3);
+	border-top-color: #fff;
+	border-radius: 50%;
+	animation: bg-tile-spin 0.8s linear infinite;
+}
+
+@keyframes bg-tile-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+.bg-tile__badge {
+	position: absolute;
+	left: 0.375rem;
+	bottom: 0.375rem;
+	padding: 0.125rem 0.5rem;
+	border-radius: 999px;
+	background: rgb(0 0 0 / 0.6);
+	color: #fff;
+	font-size: 0.75rem;
+	font-weight: 600;
 }
 
 .m3-swatch--custom {

@@ -13854,6 +13854,7 @@ dependencies = [
  "dashmap",
  "either",
  "enumset",
+ "flate2",
  "hkdf",
  "hyper 1.12.0",
  "hyper-util",
