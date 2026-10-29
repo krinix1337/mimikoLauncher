@@ -90,6 +90,8 @@
 		"security": {
 			"assetProtocol": {
 				"scope": [
+					"$DATA/mimikoLauncher/caches/icons/*",
+					"$DATA/mimikoLauncher/profiles/*/saves/*/icon.png",
 					"$APPDATA/caches/icons/*",
 					"$APPCONFIG/caches/icons/*",
 					"$CONFIG/caches/icons/*",

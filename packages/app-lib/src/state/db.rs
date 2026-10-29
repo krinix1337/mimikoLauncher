@@ -19,7 +19,68 @@ pub(crate) async fn connect(
 
     let db_path = settings_dir.join("app.db");
 
-    connect_app_db(&db_path).await
+    let pool = connect_app_db(&db_path).await?;
+    if let Some(legacy) = DirectoryInfo::legacy_settings_dir_path(app_identifier)
+        && let Err(err) =
+            rewrite_moved_paths(&pool, &legacy, &settings_dir).await
+    {
+        tracing::warn!("Failed to update paths after moving app data: {err}");
+    }
+    Ok(pool)
+}
+
+/// Replaces paths into the folder used by earlier versions with paths into
+/// the current settings folder, in every text column, once.
+async fn rewrite_moved_paths(
+    pool: &Pool<Sqlite>,
+    legacy: &Path,
+    settings_dir: &Path,
+) -> crate::Result<()> {
+    let done = sqlx::query_scalar::<_, i64>(
+        "SELECT COUNT(*) FROM app_metadata WHERE key = 'settings_dir_moved'",
+    )
+    .fetch_one(pool)
+    .await?;
+    if done > 0 {
+        return Ok(());
+    }
+
+    let legacy = legacy.to_string_lossy().to_string();
+    let current = settings_dir.to_string_lossy().to_string();
+    let tables = sqlx::query_scalar::<_, String>(
+        "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE '_sqlx_%'",
+    )
+    .fetch_all(pool)
+    .await?;
+
+    let mut tx = pool.begin().await?;
+    for table in tables {
+        let columns = sqlx::query_as::<_, (String, String)>(sqlx::AssertSqlSafe(format!(
+            "SELECT name, type FROM pragma_table_info('{table}')"
+        )))
+        .fetch_all(&mut *tx)
+        .await?;
+        for (column, kind) in columns {
+            if !kind.to_uppercase().contains("TEXT") {
+                continue;
+            }
+            sqlx::query(sqlx::AssertSqlSafe(format!(
+                "UPDATE \"{table}\" SET \"{column}\" = REPLACE(\"{column}\", ?1, ?2) WHERE INSTR(\"{column}\", ?1) > 0"
+            )))
+            .bind(&legacy)
+            .bind(&current)
+            .execute(&mut *tx)
+            .await?;
+        }
+    }
+    sqlx::query(
+        "INSERT INTO app_metadata (key, value, updated_at) VALUES ('settings_dir_moved', '1', unixepoch())",
+    )
+    .execute(&mut *tx)
+    .await?;
+    tx.commit().await?;
+
+    Ok(())
 }
 
 async fn connect_app_db(db_path: &Path) -> crate::Result<Pool<Sqlite>> {

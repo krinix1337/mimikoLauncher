@@ -5,9 +5,11 @@ use crate::state::{Settings, State};
 use crate::util::fetch::IoSemaphore;
 use crate::{ErrorKind, LoadingBarType};
 use anyhow::Context;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use tokio::fs;
 
+/// Name of the folder in the OS data directory that holds the app database.
+pub const SETTINGS_FOLDER_NAME: &str = "mimikoLauncher";
 pub const CACHES_FOLDER_NAME: &str = "caches";
 pub const LAUNCHER_LOGS_FOLDER_NAME: &str = "launcher_logs";
 pub const INSTANCES_FOLDER_NAME: &str = "profiles";
@@ -34,8 +36,41 @@ impl DirectoryInfo {
     // Get the settings directory
     // init() is not needed for this function
     pub fn initial_settings_dir_path(app_identifier: &str) -> Option<PathBuf> {
-        Self::env_path("THESEUS_CONFIG_DIR")
-            .or_else(|| Some(dirs::data_dir()?.join(app_identifier)))
+        Self::env_path("THESEUS_CONFIG_DIR").or_else(|| {
+            let data_dir = dirs::data_dir()?;
+            let settings_dir = data_dir.join(SETTINGS_FOLDER_NAME);
+            Self::move_legacy_settings_dir(
+                &data_dir.join(app_identifier),
+                &settings_dir,
+            );
+            Some(settings_dir)
+        })
+    }
+
+    /// Moves data from the folder named after the app identifier, used by
+    /// earlier versions, into the current settings folder.
+    fn move_legacy_settings_dir(legacy: &Path, settings_dir: &Path) {
+        if legacy == settings_dir || !legacy.is_dir() || settings_dir.exists()
+        {
+            return;
+        }
+        if let Err(err) = std::fs::rename(legacy, settings_dir) {
+            tracing::warn!(
+                "Failed to move {} to {}: {err}",
+                legacy.display(),
+                settings_dir.display()
+            );
+        }
+    }
+
+    /// Returns the folder that earlier versions kept app data in, if data was
+    /// moved out of it.
+    pub fn legacy_settings_dir_path(app_identifier: &str) -> Option<PathBuf> {
+        if Self::env_path("THESEUS_CONFIG_DIR").is_some() {
+            return None;
+        }
+        let legacy = dirs::data_dir()?.join(app_identifier);
+        (legacy.file_name()? != SETTINGS_FOLDER_NAME).then_some(legacy)
     }
 
     /// Get all paths needed for Theseus to operate properly
