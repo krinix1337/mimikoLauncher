@@ -18,6 +18,7 @@ import {
 	useM3Palette,
 } from '@/composables/use-m3-palette.ts'
 import { useNavLabels } from '@/composables/use-nav-labels.ts'
+import { useShowNews } from '@/composables/use-show-news.ts'
 import { type ColorTheme, isDarkTheme, useTheme } from '@/composables/use-theme.ts'
 import { injectAppSettingsModal } from '@/features/settings/app-settings-modal/context'
 import { type AppSettings, get, set } from '@/helpers/settings.ts'
@@ -29,6 +30,7 @@ const { updatePreferences } = injectUserPreferences()
 const settingsModal = injectAppSettingsModal()
 const os = platform()
 const showNavLabels = useNavLabels()
+const showNews = useShowNews()
 const m3Palette = useM3Palette()
 
 function isSelected(palette: M3Palette): boolean {
@@ -214,6 +216,13 @@ provideAppearanceSettings({
 			</p>
 		</div>
 		<Toggle id="nav-labels" v-model="showNavLabels" />
+	</div>
+	<div class="mt-6 flex items-center justify-between gap-4">
+		<div>
+			<h2 class="m-0 text-lg font-semibold text-contrast">Новости Minecraft</h2>
+			<p class="m-0 mt-1 text-secondary">Показывать новости Minecraft в панели справа.</p>
+		</div>
+		<Toggle id="show-news" v-model="showNews" />
 	</div>
 </template>
 

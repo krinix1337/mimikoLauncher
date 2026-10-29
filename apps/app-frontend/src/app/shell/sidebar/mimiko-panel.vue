@@ -2,9 +2,11 @@
 import { PlayIcon, StopCircleIcon } from '@modrinth/assets'
 import { injectNotificationManager } from '@modrinth/ui'
 import { fetch as tauriFetch } from '@tauri-apps/plugin-http'
+import { openUrl } from '@tauri-apps/plugin-opener'
 import dayjs from 'dayjs'
-import { onMounted, onScopeDispose, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, onMounted, onScopeDispose, ref, watch } from 'vue'
+
+import { useShowNews } from '@/composables/use-show-news'
 
 import { useAppEvent } from '@/composables/use-app-event'
 import { get_many } from '@/helpers/instance'
@@ -36,8 +38,12 @@ interface NewsEntry {
 	playPageImage?: { url: string }
 }
 
+const NEWS_PAGE_SIZE = 6
+
 const { handleError } = injectNotificationManager()
-const router = useRouter()
+const showNews = useShowNews()
+const newsShown = ref(NEWS_PAGE_SIZE)
+const visibleNews = computed(() => news.value.slice(0, newsShown.value))
 const running = ref<RunningGame[]>([])
 const recent = ref<(WorldWithInstance & { instanceName: string })[]>([])
 const news = ref<NewsEntry[]>([])
@@ -74,7 +80,7 @@ async function loadNews() {
 		if (!response.ok) return
 		const entries = ((await response.json()) as { entries: NewsEntry[] }).entries ?? []
 		const java = entries.filter((entry) => entry.newsType?.includes('Java'))
-		news.value = (java.length ? java : entries).slice(0, 4)
+		news.value = java.length ? java : entries
 	} catch {
 		// no network
 	}
@@ -98,7 +104,7 @@ async function joinWorld(world: WorldWithInstance) {
 }
 
 function openNews(url: string) {
-	void router.push({ path: '/news', query: { url } })
+	void openUrl(url)
 }
 
 function newsImage(entry: NewsEntry): string | null {
@@ -117,7 +123,11 @@ onScopeDispose(() => window.clearInterval(pollId))
 onMounted(() => {
 	void refreshRunning()
 	void refreshRecent()
-	void loadNews()
+	if (showNews.value) void loadNews()
+})
+
+watch(showNews, (show) => {
+	if (show && !news.value.length) void loadNews()
 })
 </script>
 
@@ -160,10 +170,10 @@ onMounted(() => {
 		</button>
 	</section>
 
-	<section v-if="news.length" class="panel-section">
+	<section v-if="showNews && news.length" class="panel-section">
 		<h3 class="panel-title">Новости Minecraft</h3>
 		<button
-			v-for="entry in news"
+			v-for="entry in visibleNews"
 			:key="entry.id"
 			type="button"
 			class="news-card"
@@ -172,6 +182,14 @@ onMounted(() => {
 			<img v-if="newsImage(entry)" :src="newsImage(entry)!" alt="" class="news-image" />
 			<span class="block px-3 pt-2 font-semibold text-contrast">{{ entry.title.trim() }}</span>
 			<span class="block px-3 pb-2 text-sm text-secondary">{{ dayjs(entry.date).format('D.MM.YYYY') }}</span>
+		</button>
+		<button
+			v-if="newsShown < news.length"
+			type="button"
+			class="panel-row panel-row--button justify-center font-semibold text-contrast"
+			@click="newsShown += NEWS_PAGE_SIZE"
+		>
+			Показать ещё
 		</button>
 	</section>
 </template>
