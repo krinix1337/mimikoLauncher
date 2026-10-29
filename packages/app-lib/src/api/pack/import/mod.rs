@@ -10,6 +10,7 @@ use crate::state::instances::commands::{
     ContentOrigin, InstallContent, install_stored_file,
 };
 use anyhow::{Context, bail};
+use futures::StreamExt;
 use io::IOError;
 use serde::{Deserialize, Serialize};
 
@@ -236,14 +237,9 @@ async fn import_instance_inner(
         }
     };
 
-    // If import failed, delete the profile
-    match res {
-        Ok(_) => {}
-        Err(e) => {
-            tracing::warn!("Import failed: {:?}", e);
-            let _ = crate::api::instance::remove(instance_id).await;
-            return Err(e);
-        }
+    if let Err(e) = res {
+        tracing::warn!("Import failed: {:?}", e);
+        return Err(e);
     }
 
     tracing::debug!("Completed import.");
@@ -516,8 +512,12 @@ async fn copy_dotminecraft_with_reporter_inner(
             }
         }
     }
-    let total = subfiles.len() as u64;
-    for (index, source) in subfiles.into_iter().enumerate() {
+    let target_instance = crate::state::instances::adapters::sqlite::instance_rows::get_instance_by_id(instance_id, &state.pool).await?
+        .ok_or(ErrorKind::InputError("unknown destination instance".to_string()))?;
+    let mut managed_files = Vec::new();
+    let mut plain_files = Vec::new();
+    let mut total = 0u64;
+    for source in subfiles {
         let relative = source
             .strip_prefix(&dotminecraft)?
             .components()
@@ -527,85 +527,129 @@ async fn copy_dotminecraft_with_reporter_inner(
         if managed_paths.contains(&relative) {
             continue;
         }
-        if tokio::fs::symlink_metadata(&source)
-            .await?
-            .file_type()
-            .is_symlink()
-        {
+        let metadata = tokio::fs::symlink_metadata(&source).await?;
+        if metadata.file_type().is_symlink() {
             tracing::warn!(path = %source.display(), "Skipping an unmanaged symlink while importing an instance");
             continue;
         }
+        total += metadata.len();
         if crate::state::content_store::is_managed_content_path(&relative)
             && !duplicate_content_paths
                 .contains(relative.trim_end_matches(".disabled"))
         {
-            let stored_file = state.content_store.store_file(&source).await?;
-            let project_type =
-                crate::state::ProjectType::get_from_parent_folder(&relative)
-                    .ok_or(ErrorKind::InputError(
-                        "invalid imported content path".to_string(),
-                    ))?;
-            install_stored_file(
-                instance_id,
-                InstallContent {
-                    requested_path: &relative,
-                    stored_file: &stored_file,
-                    project_type,
-                    source_kind: crate::state::ContentSourceKind::Local,
-                    origin: None,
-                    enabled_override: Some(!relative.ends_with(".disabled")),
-                    previous_path: None,
-                },
-                &state,
-            )
-            .await?;
+            managed_files.push((source, relative, metadata.len()));
         } else {
-            let target_instance = crate::state::instances::adapters::sqlite::instance_rows::get_instance_by_id(instance_id, &state.pool).await?
-				.ok_or(ErrorKind::InputError("unknown destination instance".to_string()))?;
-            let target = state
-                .content_store
-                .instance_path(&target_instance.path, &relative)
-                .await?;
-            if tokio::fs::symlink_metadata(&target)
-                .await
-                .is_ok_and(|metadata| metadata.file_type().is_symlink())
-            {
-                bail!(ErrorKind::InputError(
-                    "import cannot overwrite a symbolic link".to_string(),
-                ));
-            }
-            let same_file = tokio::fs::try_exists(&target).await?
-                && same_file::is_same_file(&source, &target)?;
-            if !same_file {
-                fetch::copy(&source, &target, io_semaphore).await?;
-            }
+            plain_files.push((source, relative, metadata.len()));
         }
-        reporter
+    }
+
+    let mut progress = ImportProgress::new(total, reporter, details);
+    for (source, relative, size) in managed_files {
+        let stored_file = state.content_store.store_file(&source).await?;
+        let project_type =
+            crate::state::ProjectType::get_from_parent_folder(&relative)
+                .ok_or(ErrorKind::InputError(
+                    "invalid imported content path".to_string(),
+                ))?;
+        install_stored_file(
+            instance_id,
+            InstallContent {
+                requested_path: &relative,
+                stored_file: &stored_file,
+                project_type,
+                source_kind: crate::state::ContentSourceKind::Local,
+                origin: None,
+                enabled_override: Some(!relative.ends_with(".disabled")),
+                previous_path: None,
+            },
+            &state,
+        )
+        .await?;
+        progress.advance(size).await?;
+    }
+
+    let mut copies = futures::stream::iter(plain_files.into_iter().map(
+        |(source, relative, size)| {
+            let target_path = &target_instance.path;
+            let content_store = &state.content_store;
+            async move {
+                let target =
+                    content_store.instance_path(target_path, &relative).await?;
+                if tokio::fs::symlink_metadata(&target)
+                    .await
+                    .is_ok_and(|metadata| metadata.file_type().is_symlink())
+                {
+                    tokio::fs::remove_file(&target).await?;
+                }
+                let same_file = tokio::fs::try_exists(&target).await?
+                    && same_file::is_same_file(&source, &target)?;
+                if !same_file {
+                    fetch::copy(&source, &target, io_semaphore).await?;
+                }
+                crate::Result::Ok(size)
+            }
+        },
+    ))
+    .buffer_unordered(16);
+    while let Some(size) = copies.next().await {
+        progress.advance(size?).await?;
+    }
+    progress.finish().await
+}
+
+/// Reports import progress in bytes, at most a few times per second so thousands of small files
+/// do not flood the install job with updates.
+struct ImportProgress {
+    current: u64,
+    total: u64,
+    last_report: std::time::Instant,
+    reporter: InstallProgressReporter,
+    details: InstallPhaseDetails,
+}
+
+impl ImportProgress {
+    fn new(
+        total: u64,
+        reporter: InstallProgressReporter,
+        details: InstallPhaseDetails,
+    ) -> Self {
+        Self {
+            current: 0,
+            total,
+            last_report: std::time::Instant::now(),
+            reporter,
+            details,
+        }
+    }
+
+    async fn advance(&mut self, bytes: u64) -> crate::Result<()> {
+        self.current += bytes;
+        if self.last_report.elapsed() >= std::time::Duration::from_millis(150) {
+            self.last_report = std::time::Instant::now();
+            self.report().await?;
+        }
+        Ok(())
+    }
+
+    async fn finish(mut self) -> crate::Result<()> {
+        self.current = self.total;
+        self.report().await
+    }
+
+    async fn report(&self) -> crate::Result<()> {
+        self.reporter
             .update(
                 InstallPhaseId::PreparingInstance,
                 Some(InstallProgress {
-                    current: (index + 1) as u64,
-                    total,
+                    current: self.current.min(self.total),
+                    total: self.total.max(1),
                     secondary: None,
                 }),
-                details.clone(),
+                self.details.clone(),
             )
-            .await?;
+            .await
     }
-    reporter
-        .update(
-            InstallPhaseId::PreparingInstance,
-            Some(InstallProgress {
-                current: total,
-                total,
-                secondary: None,
-            }),
-            details,
-        )
-        .await?;
-    Ok(())
 }
-
 pub(crate) async fn finish_import(
     instance_id: &str,
     dotminecraft: PathBuf,

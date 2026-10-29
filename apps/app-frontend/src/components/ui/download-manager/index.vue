@@ -34,7 +34,7 @@ const panel = useTemplateRef('panel')
 const panelId = useId()
 const progress = computed(() =>
 	activeJobs.value.length
-		? activeJobs.value.reduce((total, job) => total + job.overallProgress, 0) /
+		? activeJobs.value.reduce((total, job) => total + job.progress, 0) /
 			activeJobs.value.length
 		: 0,
 )

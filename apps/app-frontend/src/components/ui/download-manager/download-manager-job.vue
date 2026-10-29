@@ -197,6 +197,7 @@ const instanceLink = computed(() =>
 				:waiting="job.waiting && !job.paused && !job.canceling"
 				:label="`${job.title}: ${job.text}`"
 				full-width
+				:gradient-border="false"
 				class="download-manager-progress"
 			/>
 			<div
@@ -244,10 +245,5 @@ const instanceLink = computed(() =>
 
 .download-manager-progress :deep([role='progressbar']) {
 	background: var(--surface-2);
-}
-
-.download-manager-progress :deep(.progress-bar) {
-	border-top-right-radius: 0;
-	border-bottom-right-radius: 0;
 }
 </style>

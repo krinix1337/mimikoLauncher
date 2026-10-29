@@ -92,6 +92,9 @@
   "app.action-bar.install.unknown-instance": {
     "message": "Неизвестная сборка"
   },
+  "app.install.phase.copying_files": {
+    "message": "Копирование файлов"
+  },
   "app.action-bar.install.updating-shared-content": {
     "message": "Обновление совместного контента"
   },

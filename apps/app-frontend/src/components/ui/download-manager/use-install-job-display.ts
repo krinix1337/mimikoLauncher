@@ -14,6 +14,10 @@ const messages = defineMessages({
 		id: 'app.action-bar.install.updating-shared-content',
 		defaultMessage: 'Updating shared content',
 	},
+	copyingFiles: {
+		id: 'app.install.phase.copying_files',
+		defaultMessage: 'Copying files',
+	},
 })
 
 const kindMessages = defineMessages({
@@ -294,6 +298,14 @@ export function useInstallJobDisplay() {
 		return formatMessage(kindMessages[job.kind], { count: job.content_count ?? 0 })
 	}
 
+	function isCopyingFiles(job: InstallJobSnapshot): boolean {
+		return (
+			(job.kind === 'import_instance' || job.kind === 'duplicate_instance') &&
+			job.phase === 'preparing_instance' &&
+			!!job.progress
+		)
+	}
+
 	function getText(job: InstallJobSnapshot): string {
 		if (job.status === 'succeeded') return getTaskType(job)
 		if (job.status === 'canceled') return formatMessage(failureSummaryMessages.canceled)
@@ -310,6 +322,7 @@ export function useInstallJobDisplay() {
 		if (job.kind === 'update_shared_instance' && job.phase === 'downloading_content') {
 			return formatMessage(messages.updatingSharedContent)
 		}
+		if (isCopyingFiles(job)) return formatMessage(messages.copyingFiles)
 		return formatMessage(phaseMessages[job.phase])
 	}
 
@@ -353,6 +366,7 @@ export function useInstallJobDisplay() {
 
 	function getProgressType(job: InstallJobSnapshot): 'bytes' | 'count' | 'percentage' | undefined {
 		if (!getEffectiveProgress(job)) return undefined
+		if (isCopyingFiles(job)) return 'bytes'
 		if (
 			job.phase === 'preparing_java' &&
 			job.details.type === 'java' &&

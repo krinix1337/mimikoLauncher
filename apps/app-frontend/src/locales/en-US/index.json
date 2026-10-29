@@ -92,6 +92,9 @@
   "app.action-bar.install.unknown-instance": {
     "message": "Unknown instance"
   },
+  "app.install.phase.copying_files": {
+    "message": "Copying files"
+  },
   "app.action-bar.install.updating-shared-content": {
     "message": "Updating shared content"
   },
