@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { EditIcon } from '@modrinth/assets'
+import { EditIcon, UploadIcon } from '@modrinth/assets'
 import {
+	Button,
 	commonMessages,
 	defineMessages,
 	IconButton,
@@ -9,6 +10,8 @@ import {
 	useVIntl,
 } from '@modrinth/ui'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
+import { invoke } from '@tauri-apps/api/core'
+import { open } from '@tauri-apps/plugin-dialog'
 import { computed, nextTick, onScopeDispose, ref } from 'vue'
 
 import { gameSettingsKeys } from '@/helpers/game-options'
@@ -558,6 +561,52 @@ function clearBaseSource() {
 }
 
 onScopeDispose(clearBaseSource)
+
+const importModal = ref<InstanceType<typeof SyncSourceModal> | null>(null)
+const importInstanceId = ref('')
+const importPath = ref<string | null>(null)
+const importing = ref(false)
+const importSources = computed(() =>
+	instances.value.map((instance) => ({
+		id: instance.id,
+		name: `${instance.name} · ${instance.game_version}`,
+		icon_path: instance.icon_path,
+		eligible: !instance.quarantined,
+	})),
+)
+
+async function pickOptionsFile() {
+	const path = await open({
+		multiple: false,
+		directory: false,
+		filters: [{ name: 'options.txt', extensions: ['txt'] }],
+	})
+	if (typeof path !== 'string') return
+	importPath.value = path
+	importInstanceId.value = importSources.value.find((source) => source.eligible)?.id ?? ''
+	importModal.value?.show()
+}
+
+async function confirmOptionsImport() {
+	if (!importPath.value || !importInstanceId.value) return
+	importing.value = true
+	try {
+		await invoke('plugin:utils|import_game_options_file', {
+			instanceId: importInstanceId.value,
+			path: importPath.value,
+		})
+		await globalOptionMutation.mutateAsync({
+			option: 'game_options',
+			enabled: true,
+			baseInstanceId: importInstanceId.value,
+		})
+		importModal.value?.hide()
+	} catch (error) {
+		handleError(error as Error)
+	} finally {
+		importing.value = false
+	}
+}
 </script>
 
 <template>
@@ -581,7 +630,36 @@ onScopeDispose(clearBaseSource)
 			@retry="baseOption && chooseBaseInstance(baseOption)"
 		/>
 
+		<SyncSourceModal
+			ref="importModal"
+			v-model="importInstanceId"
+			title="Загрузить options.txt"
+			description="Выбери сборку той же версии Minecraft, из которой этот файл. Файл запишется в неё и станет общими настройками игры для всех сборок, включая новые."
+			:sources="importSources"
+			:loading="instancesQuery.isPending.value"
+			:pending="importing"
+			@confirm="confirmOptionsImport"
+		/>
+
 		<section>
+			<p class="m-0 mb-5 text-secondary">
+				Здесь настраивается то, что будет одинаковым во всех сборках: графика, управление, звук,
+				серверы и хотбары. Новые сборки получают эти настройки сразу, и их не нужно настраивать с
+				нуля.
+			</p>
+			<div class="mb-6 flex items-center justify-between gap-4">
+				<div class="flex min-w-0 flex-col gap-1">
+					<h2 class="m-0 text-lg font-semibold text-contrast">Готовый options.txt</h2>
+					<p class="m-0 text-secondary">
+						Загрузи файл настроек из любой сборки или другого лаунчера, и он применится ко всем
+						сборкам.
+					</p>
+				</div>
+				<Button :disabled="instances.length === 0 || importing" @click="pickOptionsFile">
+					<UploadIcon aria-hidden="true" />
+					Загрузить файл
+				</Button>
+			</div>
 			<div class="flex flex-col gap-6">
 				<div class="flex flex-col gap-4">
 					<div

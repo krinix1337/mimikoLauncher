@@ -29,6 +29,7 @@ mod ads_occlusion_macos;
 mod ads_occlusion_windows;
 pub mod cache;
 pub mod files;
+mod game_options_file;
 pub mod friends;
 pub mod worlds;
 

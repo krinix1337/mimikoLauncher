@@ -391,6 +391,7 @@ fn main() {
                         "background_panorama",
                         "background_import",
                         "background_custom_url",
+                        "import_game_options_file",
                     ])
                     .default_permission(
                         DefaultPermissionRule::AllowAllCommands,

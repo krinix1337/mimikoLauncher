@@ -186,7 +186,25 @@ pub async fn import_mmc(
 ) -> crate::Result<()> {
     let mmc_instance_path =
         mmc_base_path.join("instances").join(instance_folder);
+    import_mmc_instance(
+        mmc_instance_path,
+        &[mmc_base_path.join("icons")],
+        instance_id,
+        reporter,
+        details,
+    )
+    .await
+}
 
+/// Imports a MultiMC or Prism Launcher instance folder, looking for its custom icon in
+/// icon_dirs.
+pub(super) async fn import_mmc_instance(
+    mmc_instance_path: PathBuf,
+    icon_dirs: &[PathBuf],
+    instance_id: &str,
+    reporter: InstallProgressReporter,
+    details: InstallPhaseDetails,
+) -> crate::Result<()> {
     let mmc_pack = serde_json::from_str::<MMCPack>(
         &io::read_any_encoding_to_string(
             &mmc_instance_path.join("mmc-pack.json"),
@@ -199,11 +217,9 @@ pub async fn import_mmc(
         load_instance_cfg(&mmc_instance_path.join("instance.cfg")).await?;
 
     // Re-cache icon
-    let icon = if let Some(icon_key) = instance_cfg.icon_key {
-        let icon_path = mmc_base_path.join("icons").join(icon_key);
-        import::recache_icon(icon_path).await?
-    } else {
-        None
+    let icon = match instance_cfg.icon_key {
+        Some(icon_key) => find_icon(icon_dirs, &icon_key).await?,
+        None => None,
     };
 
     // Create description from instance.cfg
@@ -263,6 +279,27 @@ pub async fn import_mmc(
         .await?;
     }
     Ok(())
+}
+
+/// Finds and caches a custom icon by its key, which may or may not include the file extension.
+async fn find_icon(
+    icon_dirs: &[PathBuf],
+    icon_key: &str,
+) -> crate::Result<Option<PathBuf>> {
+    if icon_key.is_empty() || icon_key == "default" || icon_key.contains(['/', '\\']) {
+        return Ok(None);
+    }
+    for dir in icon_dirs {
+        for extension in ["", ".png", ".jpg", ".jpeg", ".gif", ".webp"] {
+            let path = dir.join(format!("{icon_key}{extension}"));
+            if path.is_file()
+                && let Some(icon) = import::recache_icon(path).await?
+            {
+                return Ok(Some(icon));
+            }
+        }
+    }
+    Ok(None)
 }
 
 async fn import_mmc_unmanaged(

@@ -55,6 +55,7 @@ pub fn init<R: Runtime>() -> tauri::plugin::TauriPlugin<R> {
             super::backgrounds::background_panorama,
             super::backgrounds::background_import,
             super::backgrounds::background_custom_url,
+            super::game_options_file::import_game_options_file,
         ])
         .build()
 }

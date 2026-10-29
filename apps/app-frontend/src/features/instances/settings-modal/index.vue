@@ -5,6 +5,7 @@ import {
 	CodeIcon,
 	CoffeeIcon,
 	InfoIcon,
+	Settings2Icon,
 	WindowIcon,
 	WrenchIcon,
 } from '@modrinth/assets'
@@ -32,6 +33,7 @@ import HooksSettings from './hooks-settings.vue'
 import InstallationSettings from './installation-settings.vue'
 import { provideInstanceSettings } from './instance-settings-context.ts'
 import JavaSettings from './java-settings.vue'
+import SyncedOptionsSettings from './synced-options-settings.vue'
 import WindowSettings from './window-settings.vue'
 
 const { formatMessage } = useVIntl()
@@ -144,6 +146,15 @@ const tabs = computed<TabbedModalTab[]>(() => [
 		icon: CodeIcon,
 		category: tabCategories.game,
 		content: HooksSettings,
+	},
+	{
+		name: defineMessage({
+			id: 'instance.settings.tabs.syncing',
+			defaultMessage: 'Game settings',
+		}),
+		icon: Settings2Icon,
+		category: tabCategories.game,
+		content: SyncedOptionsSettings,
 	},
 ])
 

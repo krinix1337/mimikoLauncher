@@ -3102,7 +3102,7 @@
     "message": "Ресурсы"
   },
   "app.settings.tabs.syncing": {
-    "message": "Синхронизация"
+    "message": "Настройки игры"
   },
   "app.settings.tabs.troubleshooting": {
     "message": "Решение проблем"
@@ -4089,7 +4089,7 @@
     "message": "Включить принудительное разделение, чтобы хранить синхронизированные настройки отдельно для этой сборки."
   },
   "instance.settings.tabs.syncing": {
-    "message": "Синхронизация"
+    "message": "Настройки игры"
   },
   "instance.settings.tabs.window": {
     "message": "Переопределение настроек окна"

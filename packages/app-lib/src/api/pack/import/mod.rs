@@ -27,6 +27,7 @@ use crate::{
 
 pub mod atlauncher;
 pub mod curseforge;
+pub mod folder;
 pub mod gdlauncher;
 pub mod mmc;
 
@@ -96,7 +97,7 @@ pub async fn get_importable_instances(
                     return Ok(instances);
                 }
             }
-            return Ok(Vec::new());
+            return Ok(folder::list_instance_folders(&base_path).await);
         }
     };
 
@@ -210,21 +211,28 @@ async fn import_instance_inner(
                     Box::pin(import_instance_inner(
                         instance_id,
                         lt,
-                        base_path,
-                        instance_folder,
+                        base_path.clone(),
+                        instance_folder.clone(),
                         reporter.clone(),
                     ))
                     .await?;
                     break;
                 }
             }
-            if !matched {
+            if matched {
+                return Ok(());
+            }
+            let Some(path) =
+                folder::resolve_instance_folder(&base_path, &instance_folder)
+                    .await
+            else {
                 bail!(ErrorKind::InputError(
                     "could not determine launcher type for the given path"
                         .to_string(),
                 ));
-            }
-            return Ok(());
+            };
+            folder::import_folder(path, instance_id, reporter.clone(), details)
+                .await
         }
     };
 

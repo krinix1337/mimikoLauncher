@@ -897,7 +897,7 @@
     "defaultMessage": "Добавить"
   },
   "creation-flow.modal.import-instance.custom-launcher.name": {
-    "defaultMessage": "Пользовательский ({pathName})"
+    "defaultMessage": "Папка ({pathName})"
   },
   "creation-flow.modal.import-instance.detecting-launcher-instances": {
     "defaultMessage": "Поиск сборок лаунчера..."
@@ -906,10 +906,10 @@
     "defaultMessage": "Сборки лаунчера"
   },
   "creation-flow.modal.import-instance.launcher-path.add": {
-    "defaultMessage": "Добавить путь к лаунчеру"
+    "defaultMessage": "Добавить лаунчер или папку сборки"
   },
   "creation-flow.modal.import-instance.launcher-path.placeholder": {
-    "defaultMessage": "Путь к лаунчеру..."
+    "defaultMessage": "Путь к лаунчеру, папке сборки или папке со сборками..."
   },
   "creation-flow.modal.import-instance.notification.no-instances-found.text": {
     "defaultMessage": "Не удалось найти импортируемые сборки по указанному пути."
@@ -960,7 +960,7 @@
     "defaultMessage": "Собственная настройка"
   },
   "creation-flow.modal.setup-type.option.import-instance.description": {
-    "defaultMessage": "Импортировать сборку из Prism, CurseForge, или похожего лаунчера."
+    "defaultMessage": "Импортировать сборку из Prism, Modrinth, CurseForge или просто её папку."
   },
   "creation-flow.modal.setup-type.option.import-instance.title": {
     "defaultMessage": "Импортировать сборку"

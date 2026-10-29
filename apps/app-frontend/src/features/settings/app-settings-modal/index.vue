@@ -6,6 +6,7 @@ import {
 	LanguagesIcon,
 	LightBulbIcon,
 	PaintbrushIcon,
+	RefreshCwIcon,
 	Settings2Icon,
 	ToggleRightIcon,
 	WindowIcon,
@@ -37,6 +38,7 @@ import JavaAndMemorySettings from '@/features/settings/instance-defaults/java-an
 import LaunchHooksSettings from '@/features/settings/instance-defaults/launch-hooks-settings.vue'
 import WindowSettings from '@/features/settings/instance-defaults/window-settings.vue'
 import type { InstanceDefaultsTab } from '@/features/settings/settings-actions'
+import SyncingSettings from '@/features/settings/syncing/syncing-settings.vue'
 import ResourceManagementSettings from '@/features/settings/system/resource-management-settings/index.vue'
 import TroubleshootingSettings from '@/features/settings/system/troubleshooting-settings.vue'
 import { appSettingsKeys, appSettingsQueryOptions, set } from '@/helpers/settings.ts'
@@ -147,6 +149,15 @@ const tabs = [
 	},
 	{
 		name: defineMessage({
+			id: 'app.settings.tabs.syncing',
+			defaultMessage: 'Game settings',
+		}),
+		category: tabCategories.instanceDefaults,
+		icon: RefreshCwIcon,
+		content: SyncingSettings,
+	},
+	{
+		name: defineMessage({
 			id: 'app.settings.tabs.resources',
 			defaultMessage: 'Resources',
 		}),
@@ -232,6 +243,16 @@ function showFeatureFlags(): void {
 	modal.value?.show()
 }
 
+function showSyncedOptions(): void {
+	const syncedOptionsTabIndex = availableTabs.value.findIndex(
+		(tab) => tab.content === SyncingSettings,
+	)
+	if (syncedOptionsTabIndex >= 0) {
+		modal.value?.setTab(syncedOptionsTabIndex)
+	}
+	modal.value?.show()
+}
+
 function showInstanceDefaults(tab: InstanceDefaultsTab): void {
 	const content = {
 		java: JavaAndMemorySettings,
@@ -245,7 +266,7 @@ function showInstanceDefaults(tab: InstanceDefaultsTab): void {
 	modal.value?.show()
 }
 
-defineExpose({ show, showFeatureFlags, showInstanceDefaults })
+defineExpose({ show, showFeatureFlags, showSyncedOptions, showInstanceDefaults })
 
 const { progress, version: downloadingVersion } = injectAppUpdateDownloadProgress()
 

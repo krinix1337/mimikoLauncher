@@ -997,7 +997,7 @@ const settingsActions = provideSettingsActions({
 	openSettings: () => appSettingsModal.value?.show(),
 	openProfile: () => appSettingsModal.value?.show(),
 	openFeatureFlags: () => appSettingsModal.value?.showFeatureFlags(),
-	openSyncedOptions: () => appSettingsModal.value?.show(),
+	openSyncedOptions: () => appSettingsModal.value?.showSyncedOptions(),
 	openInstanceDefaults: (tab) => appSettingsModal.value?.showInstanceDefaults(tab),
 })
 

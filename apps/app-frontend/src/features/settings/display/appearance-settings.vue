@@ -26,6 +26,7 @@ import {
 	M3_PRESETS,
 	type M3Palette,
 	previewColor,
+	useBackgroundSeed,
 	useM3Palette,
 } from '@/composables/use-m3-palette.ts'
 import { useNavLabels } from '@/composables/use-nav-labels.ts'
@@ -54,6 +55,15 @@ function isSelected(palette: M3Palette): boolean {
 const isCustom = computed(() => !M3_PRESETS.some((preset) => isSelected(preset.palette)))
 
 const background = useBackground()
+const backgroundSeed = useBackgroundSeed()
+const accentFromBackground = computed(
+	() => background.value.accent && background.value.source.kind !== 'none',
+)
+const backgroundAccent = computed(() =>
+	backgroundSeed.value
+		? previewColor({ seed: backgroundSeed.value, monochrome: false }, true)
+		: 'var(--color-brand)',
+)
 const customPreview = ref<string | null>(null)
 const importing = ref(false)
 const downloadingPanorama = ref<string | null>(null)
@@ -248,23 +258,42 @@ provideAppearanceSettings({
 			Вся палитра темы строится из одного цвета, как в Android. «Чёрный» делает тему без цветных
 			акцентов.
 		</p>
-		<div class="mt-3 flex flex-wrap items-center gap-2">
+		<div
+			v-if="accentFromBackground"
+			class="m3-locked mt-3"
+		>
+			<span class="m3-locked__swatch" :style="{ '--swatch': backgroundAccent }" />
+			<span>
+				Сейчас цвет берётся из фона. Чтобы выбрать свой, выключи «Акцент под фон» в разделе «Фон».
+			</span>
+		</div>
+		<div
+			class="mt-3 flex flex-wrap items-center gap-2"
+			:class="{ 'm3-swatches--locked': accentFromBackground }"
+			:inert="accentFromBackground"
+		>
 			<button
 				v-for="preset in M3_PRESETS"
 				:key="preset.name"
 				v-tooltip="preset.name"
 				type="button"
 				class="m3-swatch"
-				:class="{ 'm3-swatch--selected': isSelected(preset.palette) }"
+				:class="{ 'm3-swatch--selected': !accentFromBackground && isSelected(preset.palette) }"
 				:style="{ '--swatch': previewColor(preset.palette, true) }"
 				:aria-label="preset.name"
+				:disabled="accentFromBackground"
 				@click="m3Palette = { ...preset.palette }"
 			/>
-			<label v-tooltip="'Свой цвет'" class="m3-swatch m3-swatch--custom" :class="{ 'm3-swatch--selected': isCustom }">
+			<label
+				v-tooltip="'Свой цвет'"
+				class="m3-swatch m3-swatch--custom"
+				:class="{ 'm3-swatch--selected': !accentFromBackground && isCustom }"
+			>
 				<input
 					type="color"
 					:value="m3Palette.seed"
 					aria-label="Свой цвет"
+					:disabled="accentFromBackground"
 					@input="m3Palette = { seed: ($event.target as HTMLInputElement).value, monochrome: false }"
 				/>
 			</label>
@@ -513,6 +542,31 @@ provideAppearanceSettings({
 	color: #fff;
 	font-size: 0.75rem;
 	font-weight: 600;
+}
+
+.m3-swatches--locked {
+	opacity: 0.38;
+	filter: grayscale(0.6);
+	pointer-events: none;
+}
+
+.m3-locked {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	padding: 0.75rem 1rem;
+	border-radius: 16px;
+	background: var(--color-button-bg);
+	color: var(--color-text-primary);
+	font-size: 0.875rem;
+}
+
+.m3-locked__swatch {
+	flex-shrink: 0;
+	width: 1.75rem;
+	height: 1.75rem;
+	border-radius: 50%;
+	background: var(--swatch);
 }
 
 .m3-swatch--custom {

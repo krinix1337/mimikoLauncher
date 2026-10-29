@@ -3123,7 +3123,7 @@
     "message": "Resources"
   },
   "app.settings.tabs.syncing": {
-    "message": "Syncing"
+    "message": "Game settings"
   },
   "app.settings.tabs.troubleshooting": {
     "message": "Troubleshooting"
@@ -4113,7 +4113,7 @@
     "message": "Enable an override to keep a synced setting separate for this instance."
   },
   "instance.settings.tabs.syncing": {
-    "message": "Syncing"
+    "message": "Game settings"
   },
   "instance.settings.tabs.window": {
     "message": "Custom window settings"

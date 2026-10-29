@@ -8,7 +8,7 @@ import {
 	SchemeMonochrome,
 	SchemeTonalSpot,
 } from '@material/material-color-utilities'
-import { ref, watch } from 'vue'
+import { readonly, ref, watch } from 'vue'
 
 const STORAGE_KEY = 'mimiko-m3-palette'
 
@@ -85,6 +85,11 @@ const backgroundSeed = ref<string | null>(null)
 /** Overrides the chosen palette with a seed taken from the background, or restores it with null. */
 export function setBackgroundSeed(seed: string | null) {
 	backgroundSeed.value = seed
+}
+
+/** The seed taken from the background, or null while the chosen palette is used. */
+export function useBackgroundSeed() {
+	return readonly(backgroundSeed)
 }
 
 function activePalette(): M3Palette {
