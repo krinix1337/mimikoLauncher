@@ -216,7 +216,7 @@ defineExpose({ show, hide, selectedTab, setTab })
 								</span>
 								<span
 									v-if="tab.badge"
-									class="shrink-0 rounded-full px-1.5 py-0.5 text-xs font-bold bg-brand-highlight text-brand-green"
+									class="shrink-0 rounded-full px-1.5 py-0.5 text-xs font-bold bg-brand-highlight text-brand"
 								>
 									{{ formatMessage(tab.badge) }}
 								</span>
