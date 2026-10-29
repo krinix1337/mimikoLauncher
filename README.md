@@ -1,92 +1,97 @@
 <div align="center">
 
-<img src="apps/app/icons/128x128@2x.png" width="128" alt="mimikoLauncher" />
-
-# mimikoLauncher
-
-**Красивый лаунчер Minecraft на основе Modrinth App: без рекламы, без обязательного аккаунта Microsoft, с обоями, панорамами и Material 3.**
-
-[![Скачать](https://img.shields.io/github/v/release/krinix1337/mimikoLauncher?style=for-the-badge&label=%D0%A1%D0%BA%D0%B0%D1%87%D0%B0%D1%82%D1%8C&color=7c5cc4&logo=windows&logoColor=white)](https://github.com/krinix1337/mimikoLauncher/releases/latest)
-[![Tauri](https://img.shields.io/badge/Tauri-2-7c5cc4?style=for-the-badge&logo=tauri&logoColor=white)](https://tauri.app)
-[![Rust](https://img.shields.io/badge/Rust-1.95-7c5cc4?style=for-the-badge&logo=rust&logoColor=white)](https://www.rust-lang.org)
-[![Vue](https://img.shields.io/badge/Vue-3-7c5cc4?style=for-the-badge&logo=vuedotjs&logoColor=white)](https://vuejs.org)
-[![License](https://img.shields.io/badge/license-GPL--3.0-7c5cc4?style=for-the-badge)](apps/app/LICENSE)
-
-[**⬇️ Скачать для Windows**](https://github.com/krinix1337/mimikoLauncher/releases/latest) · [mimiko.fun](https://mimiko.fun)
+<a href="https://github.com/krinix1337/mimikoLauncher/releases/latest">
+	<img src=".github/assets/hero.png" alt="mimikoLauncher — лаунчер Minecraft" width="100%" />
+</a>
 
 <br />
+<br />
 
-<img src=".github/assets/home.png" alt="Главная страница mimikoLauncher" width="900" />
+[![Релиз](https://img.shields.io/github/v/release/krinix1337/mimikoLauncher?style=for-the-badge&label=%D1%80%D0%B5%D0%BB%D0%B8%D0%B7&labelColor=211F26&color=D0BCFF)](https://github.com/krinix1337/mimikoLauncher/releases/latest)
+[![Windows](https://img.shields.io/badge/Windows-10%20%7C%2011-D0BCFF?style=for-the-badge&logo=windows&logoColor=D0BCFF&labelColor=211F26)](https://github.com/krinix1337/mimikoLauncher/releases/latest)
+[![Tauri](https://img.shields.io/badge/Tauri-2-EFB8C8?style=for-the-badge&logo=tauri&logoColor=EFB8C8&labelColor=211F26)](https://tauri.app)
+[![Rust](https://img.shields.io/badge/Rust-1.95-EFB8C8?style=for-the-badge&logo=rust&logoColor=EFB8C8&labelColor=211F26)](https://www.rust-lang.org)
+[![Vue](https://img.shields.io/badge/Vue-3-CCC2DC?style=for-the-badge&logo=vuedotjs&logoColor=CCC2DC&labelColor=211F26)](https://vuejs.org)
+[![Лицензия](https://img.shields.io/badge/GPL--3.0-CCC2DC?style=for-the-badge&label=%D0%BB%D0%B8%D1%86%D0%B5%D0%BD%D0%B7%D0%B8%D1%8F&labelColor=211F26)](apps/app/LICENSE)
+
+**[Скачать](https://github.com/krinix1337/mimikoLauncher/releases/latest)** &nbsp;·&nbsp; **[Возможности](#-возможности)** &nbsp;·&nbsp; **[Скриншоты](#-скриншоты)** &nbsp;·&nbsp; **[Установка](#-установка)** &nbsp;·&nbsp; **[mimiko.fun](https://mimiko.fun)**
 
 </div>
 
----
+<br />
 
 ## ✨ Возможности
 
-<table>
-<tr>
-<td width="50%" valign="top">
+<img src=".github/assets/features.png" alt="Возможности mimikoLauncher" width="100%" />
 
-### 🎮 Играй как хочешь
-- **Вход по нику** — без лицензии: ввёл ник и в игру. UUID совпадает с офлайн-режимом сервера
-- **Ely.by** — вход через аккаунт [Ely.by](https://ely.by), скины в игре через authlib-injector
-- **Аккаунт Microsoft** — тоже работает, если есть лицензия
+<details>
+<summary><b>Подробнее о каждой возможности</b></summary>
+<br />
 
-</td>
-<td width="50%" valign="top">
+| | Что умеет |
+| :-- | :-- |
+| 🎮 **Вход** | По нику без лицензии (UUID совпадает с офлайн-режимом сервера), через [Ely.by](https://ely.by) со скинами в игре или через аккаунт Microsoft |
+| 🖼️ **Фон** | Восемь обоев в высоком качестве, своя картинка с компьютера и панорамы главного меню Minecraft — от Classic до 26.x, плюс первоапрельские. Панорама медленно вращается, как в игре |
+| 🎨 **Оформление** | Material 3 Expressive, цветовые схемы, акцент под выбранные обои и матовое стекло рамки с настраиваемым размытием |
+| 📦 **Контент** | Моды, шейдеры, ресурспаки и модпаки `.mrpack` с Modrinth. Fabric, Quilt, Forge и NeoForge |
+| 📂 **Перенос** | Сборки из Prism Launcher, MultiMC и Modrinth App — достаточно выбрать папку, название и иконка сохранятся |
+| ⚙️ **Настройки игры** | Загрузи готовый `options.txt` — графика, бинды и сервера будут одинаковыми во всех сборках |
+| 🚫 **Без лишнего** | Никакой рекламы, баннеров и обязательного аккаунта |
 
-### 🖼️ Обои и панорамы
-- **Подборка обоев** в высоком качестве и **своя картинка** с компьютера
-- **Панорамы главного меню Minecraft** всех версий, от Classic до 26.x, плюс первоапрельские
-- **Акцент под фон** — цвет интерфейса сам подстраивается под выбранные обои
-
-</td>
-</tr>
-<tr>
-<td width="50%" valign="top">
-
-### 🎨 Material 3 и стекло
-- Оформление **Material 3 Expressive** со своими цветовыми схемами
-- **Матовое стекло** рамки и панелей с настраиваемой силой размытия
-- Без рекламы, баннеров и окон согласия
-
-</td>
-<td width="50%" valign="top">
-
-### 📦 Сборки и моды
-- Поиск и установка модов, шейдеров и ресурспаков с **Modrinth**, `.mrpack`
-- Fabric / Quilt / Forge / NeoForge
-- **Перенос сборок** из Prism Launcher, MultiMC и Modrinth App — просто выбери папку, название и иконка сохранятся
-- **Общие настройки игры** — загрузи готовый `options.txt`, и графика, бинды и сервера будут во всех сборках
-
-</td>
-</tr>
-</table>
+</details>
 
 ## 📸 Скриншоты
 
 <div align="center">
 
-<img src=".github/assets/appearance.png" alt="Выбор обоев и панорам" width="900" />
+<img src=".github/assets/home.png" alt="Главная страница" width="100%" />
 
-<sub>Обои и панорамы Minecraft в настройках внешнего вида</sub>
+<sub><b>Главная</b> — недавние миры и библиотека сборок на обоях</sub>
 
-<br /><br />
+<br />
+<br />
 
-<img src=".github/assets/browse.png" alt="Каталог модов" width="900" />
-
-<sub>Каталог модов Modrinth</sub>
+<table>
+<tr>
+<td width="50%"><img src=".github/assets/appearance.png" alt="Обои и панорамы" /></td>
+<td width="50%"><img src=".github/assets/browse.png" alt="Каталог модов" /></td>
+</tr>
+<tr>
+<td align="center"><sub><b>Внешний вид</b> — обои и панорамы Minecraft</sub></td>
+<td align="center"><sub><b>Каталог</b> — моды с Modrinth</sub></td>
+</tr>
+</table>
 
 </div>
 
 ## ⬇️ Установка
 
-1. Скачай `mimikoLauncher_x.x.x_x64-setup.exe` со страницы [**релизов**](https://github.com/krinix1337/mimikoLauncher/releases/latest).
-2. Запусти установщик. Права администратора не нужны, лаунчер ставится только для текущего пользователя.
-3. Если Windows покажет «Windows защитила ваш компьютер», нажми **Подробнее → Выполнить в любом случае**: установщик пока не подписан сертификатом.
+<a href="https://github.com/krinix1337/mimikoLauncher/releases/latest">
+	<img src=".github/assets/download.png" alt="Скачать mimikoLauncher" width="100%" />
+</a>
 
-## 🛠️ Сборка из исходников
+1. Открой [последний релиз](https://github.com/krinix1337/mimikoLauncher/releases/latest) и скачай `mimikoLauncher_x.x.x_x64-setup.exe`.
+2. Запусти установщик — права администратора не нужны, лаунчер ставится для текущего пользователя.
+3. Готово: ярлык появится на рабочем столе и в меню «Пуск».
+
+> [!WARNING]
+> Установщик пока не подписан сертификатом. Если Windows покажет «Windows защитила ваш компьютер», нажми **Подробнее → Выполнить в любом случае**.
+
+> [!TIP]
+> Уже есть сборки в Prism Launcher или Modrinth App? Нажми **＋ → Импорт** и выбери папку сборки — всё перенесётся вместе с названием и иконкой.
+
+## 🗺️ Планы
+
+- [x] Убрать рекламу и сервисы Modrinth
+- [x] Вход по нику и через Ely.by
+- [x] Обои, панорамы Minecraft и акцент под фон
+- [x] Material 3 Expressive и матовое стекло
+- [x] Перенос сборок из других лаунчеров и общий `options.txt`
+- [ ] Скины Ely.by в превью лаунчера
+- [ ] Автообновление лаунчера
+
+<details>
+<summary><h2>🛠️ Сборка из исходников</h2></summary>
 
 Нужны **Rust** (`rustup`), **Node.js 24+**, **pnpm** и на Windows — **Visual Studio Build Tools** (C++).
 
@@ -97,22 +102,13 @@ pnpm app:dev      # запуск в режиме разработки
 pnpm app:build    # сборка установщика
 ```
 
+> [!NOTE]
 > Первая сборка Rust долгая. Чтобы компьютер не лагал, ограничь потоки: `CARGO_BUILD_JOBS=4`.
 
-## 🗺️ Планы
-
-- [x] Убрать рекламу и сервисы Modrinth (друзья, новости, Modrinth+)
-- [x] Вход по нику без Microsoft
-- [x] Вход через Ely.by и скины (authlib-injector)
-- [x] Вырезать хостинг, аккаунт Modrinth и общие сборки
-- [x] Обои, панорамы Minecraft и акцент под фон
-- [x] Material 3 и матовое стекло
-- [x] Перенос сборок из других лаунчеров и общий `options.txt`
-- [ ] Скины Ely.by в превью лаунчера
-- [ ] Автообновление лаунчера
+</details>
 
 ## 📄 Лицензия
 
-mimikoLauncher основан на открытом [Modrinth App](https://github.com/modrinth/code) и распространяется по лицензии **GPL-3.0** (см. [`apps/app/LICENSE`](apps/app/LICENSE)).
-Название и логотип Modrinth — товарные знаки Rinth, Inc.; проект с ними не связан и их не использует.
-Обои — с [Unsplash](https://unsplash.com), панорамы — из игры Minecraft © Mojang Studios.
+mimikoLauncher основан на открытом [Modrinth App](https://github.com/modrinth/code) и распространяется по лицензии **GPL-3.0** — см. [`apps/app/LICENSE`](apps/app/LICENSE).
+
+<sub>Название и логотип Modrinth — товарные знаки Rinth, Inc.; проект с ними не связан. Обои — с [Unsplash](https://unsplash.com), панорамы — из Minecraft © Mojang Studios.</sub>
