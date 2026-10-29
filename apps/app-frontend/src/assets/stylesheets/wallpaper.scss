@@ -25,12 +25,10 @@ body.mimiko-wallpaper {
 		background: transparent !important;
 	}
 
+	--brand-gradient-border: color-mix(in srgb, #fff 9%, transparent);
+
 	.app-contents::before {
-		border-color: color-mix(in srgb, #fff 14%, transparent);
-		box-shadow:
-			inset 0 1px 0 color-mix(in srgb, #fff 10%, transparent),
-			inset 0 10px 18px -10px rgb(0 0 0 / 0.45),
-			inset 10px 0 18px -10px rgb(0 0 0 / 0.45);
+		display: none;
 	}
 
 	.app-sidebar {
@@ -50,6 +48,15 @@ body.mimiko-wallpaper {
 		--md-surface-container-low: color-mix(in srgb, var(--color-bg) 58%, transparent);
 		--md-surface-container: color-mix(in srgb, var(--color-bg) 60%, transparent);
 		--md-surface-container-high: color-mix(in srgb, var(--color-bg) 64%, transparent);
+		--surface-5: color-mix(in srgb, #fff 10%, transparent);
+		--color-divider: color-mix(in srgb, #fff 10%, transparent);
+		--md-outline-variant: color-mix(in srgb, #fff 14%, transparent);
+
+		[class*='border-surface-'],
+		.card,
+		.search > .flex-col.gap-3 > * {
+			border-color: color-mix(in srgb, #fff 10%, transparent) !important;
+		}
 	}
 }
 

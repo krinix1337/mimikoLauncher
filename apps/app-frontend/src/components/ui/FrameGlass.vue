@@ -7,6 +7,7 @@ import { onMounted, ref } from 'vue'
  * navigation rail and right panel share a single seamless glass surface.
  */
 const clipPath = ref<string>()
+const outline = ref<Record<string, string>>({})
 const viewport = ref<HTMLElement | null>(null)
 
 function update() {
@@ -25,6 +26,13 @@ function update() {
 		rect.height / 2,
 	)
 	const { left, top, right, bottom } = rect
+	outline.value = {
+		left: `${left}px`,
+		top: `${top}px`,
+		width: `${right - left}px`,
+		height: `${bottom - top}px`,
+		borderTopLeftRadius: `${radius}px`,
+	}
 	clipPath.value =
 		`path(evenodd, 'M0 0H${width}V${height}H0Z ` +
 		`M${left + radius} ${top}H${right}V${bottom}H${left}V${top + radius}` +
@@ -43,9 +51,21 @@ useMutationObserver(
 
 <template>
 	<div class="frame-glass" :style="{ clipPath }" aria-hidden="true" />
+	<div class="frame-outline" :style="outline" aria-hidden="true" />
 </template>
 
 <style scoped>
+.frame-outline {
+	position: absolute;
+	box-sizing: border-box;
+	border: 1px solid color-mix(in srgb, #fff 12%, transparent);
+	border-right: none;
+	border-bottom: none;
+	box-shadow:
+		inset 0 10px 18px -10px rgb(0 0 0 / 0.4),
+		inset 10px 0 18px -10px rgb(0 0 0 / 0.4);
+}
+
 .frame-glass {
 	position: absolute;
 	inset: 0;

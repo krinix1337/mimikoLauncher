@@ -234,7 +234,7 @@ function openContextMenu(event: MouseEvent) {
 			</template>
 			<div
 				class="clickable-card grid grid-cols-[auto_minmax(0,3fr)_minmax(0,4fr)_auto] items-center gap-2 border border-surface-4 rounded-[20px] smart-clickable:highlight-on-hover transition-[filter] ease-out [--hover-brightness:1.1] min-h-20 p-3"
-				:class="newlyAdded ? 'border-dashed bg-surface-2' : 'bg-bg-raised border-solid'"
+				:class="newlyAdded ? 'border-solid bg-surface-2' : 'bg-bg-raised border-solid'"
 			>
 				<Avatar
 					:src="getInstanceIconUrl(instanceIcon)"
