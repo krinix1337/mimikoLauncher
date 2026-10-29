@@ -80,6 +80,23 @@ function readStored(): M3Palette {
 }
 
 const palette = ref<M3Palette>(readStored())
+const backgroundSeed = ref<string | null>(null)
+
+/** Overrides the chosen palette with a seed taken from the background, or restores it with null. */
+export function setBackgroundSeed(seed: string | null) {
+	backgroundSeed.value = seed
+}
+
+function activePalette(): M3Palette {
+	return backgroundSeed.value ? { seed: backgroundSeed.value, monochrome: false } : palette.value
+}
+
+const BRAND_PROPERTIES = [
+	'--color-brand',
+	'--color-brand-highlight',
+	'--color-brand-shadow',
+	'--color-accent-contrast',
+]
 
 function buildScheme(value: M3Palette, isDark: boolean): DynamicScheme {
 	const source = Hct.fromInt(argbFromHex(value.seed))
@@ -90,7 +107,8 @@ function buildScheme(value: M3Palette, isDark: boolean): DynamicScheme {
 
 /**
  * Writes the M3 color roles generated from the chosen palette onto the root element while an M3
- * theme is active, and removes them otherwise so other themes keep their own colors.
+ * theme is active, and removes them otherwise so other themes keep their own colors. A background
+ * seed also recolors the accent of the other themes.
  */
 function applyPalette() {
 	const root = document.documentElement
@@ -100,12 +118,31 @@ function applyPalette() {
 	for (const role of Object.keys(ROLES)) {
 		root.style.removeProperty(`--md-${role}`)
 	}
-	if (!isDark && !isLight) return
+	for (const property of BRAND_PROPERTIES) {
+		root.style.removeProperty(property)
+	}
+	if (!isDark && !isLight) {
+		if (backgroundSeed.value) applyBrand(root)
+		return
+	}
 
-	const scheme = buildScheme(palette.value, isDark)
+	const scheme = buildScheme(activePalette(), isDark)
 	for (const [role, color] of Object.entries(ROLES)) {
 		root.style.setProperty(`--md-${role}`, hexFromArgb(color.getArgb(scheme)))
 	}
+}
+
+function applyBrand(root: HTMLElement) {
+	const isLight = root.classList.contains('light-mode')
+	const scheme = buildScheme(activePalette(), !isLight)
+	const primary = hexFromArgb(MaterialDynamicColors.primary.getArgb(scheme))
+	root.style.setProperty('--color-brand', primary)
+	root.style.setProperty('--color-brand-highlight', `color-mix(in srgb, ${primary} 25%, transparent)`)
+	root.style.setProperty('--color-brand-shadow', `color-mix(in srgb, ${primary} 70%, transparent)`)
+	root.style.setProperty(
+		'--color-accent-contrast',
+		hexFromArgb(MaterialDynamicColors.onPrimary.getArgb(scheme)),
+	)
 }
 
 let started = false
@@ -132,6 +169,7 @@ export function startM3Palette() {
 		},
 		{ deep: true },
 	)
+	watch(backgroundSeed, applyPalette)
 }
 
 /** The palette the Material 3 themes are generated from. */

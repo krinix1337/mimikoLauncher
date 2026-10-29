@@ -1,5 +1,8 @@
+import { hexFromArgb, QuantizerCelebi, Score } from '@material/material-color-utilities'
 import { invoke } from '@tauri-apps/api/core'
 import { ref, watch } from 'vue'
+
+import { setBackgroundSeed } from '@/composables/use-m3-palette'
 
 import aurora from '@/assets/backgrounds/aurora.webp'
 import auroraPeaks from '@/assets/backgrounds/aurora_peaks.webp'
@@ -26,6 +29,8 @@ export interface BackgroundSettings {
 	everywhere: boolean
 	/** Slowly rotate the panorama. */
 	rotate: boolean
+	/** Take the accent color from the background. */
+	accent: boolean
 }
 
 export interface BackgroundPreset {
@@ -84,6 +89,8 @@ export const PANORAMA_PRESETS: PanoramaPreset[] = [
 	panorama('1.14', 'Village & Pillage', '1.14 – 1.14.4'),
 	panorama('1.13', 'Update Aquatic', '1.13 – 1.13.2'),
 	panorama('classic', 'Классическая', '1.0 – 1.12.2'),
+	panorama('april-2026', 'Первое апреля 2026', '26w14a'),
+	panorama('craftmine', 'Небо Craftmine', '25w14craftmine'),
 	panorama('potato', 'Poisonous Potato Update', '24w14potato'),
 ]
 
@@ -95,6 +102,7 @@ const DEFAULTS: BackgroundSettings = {
 	blur: 0,
 	everywhere: false,
 	rotate: true,
+	accent: false,
 }
 
 function readStored(): BackgroundSettings {
@@ -144,4 +152,73 @@ export function importBackground(path: string): Promise<string> {
 
 export function getCustomBackgroundUrl(name: string): Promise<string> {
 	return invoke<string>('plugin:utils|background_custom_url', { name })
+}
+
+/** Image URLs a background is drawn from, for color extraction. */
+async function sourceImages(source: BackgroundSource): Promise<string[]> {
+	if (source.kind === 'preset') {
+		const preset = BACKGROUND_PRESETS.find((entry) => entry.id === source.id)
+		return preset ? [preset.url] : []
+	}
+	if (source.kind === 'custom') return [await getCustomBackgroundUrl(source.name)]
+	if (source.kind === 'panorama') return (await getPanorama(source.id)).slice(0, 4)
+	return []
+}
+
+function loadImage(url: string): Promise<HTMLImageElement> {
+	return new Promise((resolve, reject) => {
+		const image = new Image()
+		image.crossOrigin = 'anonymous'
+		image.onload = () => resolve(image)
+		image.onerror = reject
+		image.src = url
+	})
+}
+
+/** Picks the most suitable Material seed color from a set of images, as Android does for wallpapers. */
+async function extractSeed(urls: string[]): Promise<string | null> {
+	const size = 96
+	const canvas = document.createElement('canvas')
+	canvas.width = size * urls.length
+	canvas.height = size
+	const context = canvas.getContext('2d', { willReadFrequently: true })
+	if (!context) return null
+	const images = await Promise.all(urls.map(loadImage))
+	images.forEach((image, index) => context.drawImage(image, index * size, 0, size, size))
+	const data = context.getImageData(0, 0, canvas.width, canvas.height).data
+	const pixels: number[] = []
+	for (let index = 0; index < data.length; index += 4) {
+		if (data[index + 3] < 255) continue
+		pixels.push(
+			((data[index + 3] << 24) | (data[index] << 16) | (data[index + 1] << 8) | data[index + 2]) >>> 0,
+		)
+	}
+	const [best] = Score.score(QuantizerCelebi.quantize(pixels, 128))
+	return best === undefined ? null : hexFromArgb(best)
+}
+
+let accentStarted = false
+
+/** Keeps the accent color in sync with the background while that option is on. */
+export function startBackgroundAccent() {
+	if (accentStarted) return
+	accentStarted = true
+	let request = 0
+	watch(
+		() => [settings.value.accent, JSON.stringify(settings.value.source)] as const,
+		async ([accent]) => {
+			const current = ++request
+			if (!accent || settings.value.source.kind === 'none') {
+				setBackgroundSeed(null)
+				return
+			}
+			try {
+				const seed = await extractSeed(await sourceImages(settings.value.source))
+				if (current === request) setBackgroundSeed(seed)
+			} catch {
+				if (current === request) setBackgroundSeed(null)
+			}
+		},
+		{ immediate: true },
+	)
 }

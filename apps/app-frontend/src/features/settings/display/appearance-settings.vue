@@ -353,6 +353,16 @@ provideAppearanceSettings({
 			</div>
 			<div class="mt-4 flex items-center justify-between gap-4">
 				<div>
+					<h3 class="m-0 text-base font-semibold text-contrast">Акцент под фон</h3>
+					<p class="m-0 mt-1 text-secondary">
+						Цвет кнопок и выделений берётся из фона, как на Android. Заменяет выбранный цвет
+						Material 3.
+					</p>
+				</div>
+				<Toggle id="background-accent" v-model="background.accent" />
+			</div>
+			<div class="mt-4 flex items-center justify-between gap-4">
+				<div>
 					<h3 class="m-0 text-base font-semibold text-contrast">На всех страницах</h3>
 					<p class="m-0 mt-1 text-secondary">Иначе фон виден только на главной.</p>
 				</div>

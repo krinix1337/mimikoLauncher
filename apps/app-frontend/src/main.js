@@ -7,6 +7,7 @@ import { VueQueryPlugin } from '@tanstack/vue-query'
 import { createApp } from 'vue'
 
 import App from '@/App.vue'
+import { startBackgroundAccent } from '@/composables/use-background'
 import { startM3Palette } from '@/composables/use-m3-palette'
 import { overlayScrollbarsDirective } from '@/directives/overlayScrollbars'
 import { setupErrorReporting } from '@/helpers/error-reporting'
@@ -17,6 +18,7 @@ import router from '@/routes'
 
 debugStartup('Frontend entry module evaluated')
 startM3Palette()
+startBackgroundAccent()
 const app = createApp(App)
 setupErrorReporting(app, router)
 

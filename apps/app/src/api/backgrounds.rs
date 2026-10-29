@@ -228,6 +228,34 @@ const PANORAMAS: &[(&str, PanoramaSource)] = &[
         },
     ),
     (
+        "april-2026",
+        PanoramaSource::Jar {
+            url: "https://piston-data.mojang.com/v1/objects/49040e0696c6ade6606645f0065f7aed34ce53d0/client.jar",
+            entries: [
+                (12685747, 822290),
+                (13508147, 659710),
+                (14167967, 664890),
+                (14832967, 712032),
+                (15545109, 617825),
+                (16163044, 182079),
+            ],
+        },
+    ),
+    (
+        "craftmine",
+        PanoramaSource::Jar {
+            url: "https://piston-data.mojang.com/v1/objects/0f3ed2e39938ccd178981f34f3f62ab7d08b399c/client.jar",
+            entries: [
+                (14030230, 98163),
+                (14128501, 153093),
+                (14468423, 145623),
+                (13852517, 177145),
+                (14281702, 186613),
+                (14029770, 352),
+            ],
+        },
+    ),
+    (
         "potato",
         PanoramaSource::Jar {
             url: "https://piston-data.mojang.com/v1/objects/b3be1d7926319d4d58f3d8f25d648bf7d1e43970/client.jar",
