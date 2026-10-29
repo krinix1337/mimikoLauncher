@@ -72,14 +72,17 @@ body.mimiko-glass {
 		backdrop-filter: blur(var(--frame-blur, 28px)) saturate(1.6);
 	}
 
+	$glass-blocks: '.card, [class*="bg-bg-raised"], [class*="bg-surface-2"], [class*="bg-surface-3"], [class*="bg-surface-4"], [class*="bg-button-bg"]';
+
 	.app-viewport {
-		.card,
-		[class*='bg-bg-raised'],
-		[class*='bg-surface-2'],
-		[class*='bg-surface-3'],
-		[class*='bg-surface-4'],
-		[class*='bg-button-bg'] {
+		:is(#{$glass-blocks}) {
 			backdrop-filter: blur(var(--frame-blur, 28px)) saturate(1.4);
+		}
+
+		// Blocks inside an already frosted block see only that block, so a second blur pass per
+		// row or button costs a lot of GPU time without changing the picture.
+		:is(#{$glass-blocks}) :is(#{$glass-blocks}) {
+			backdrop-filter: none;
 		}
 	}
 

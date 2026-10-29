@@ -3,6 +3,8 @@ import { ChevronLeftIcon, ChevronRightIcon, RightArrowIcon } from '@modrinth/ass
 import { defineMessages, IconButton, useVIntl } from '@modrinth/ui'
 import { useRouter } from 'vue-router'
 
+import launcherIcon from '@/assets/launcher-icon.png'
+
 import AppActionBar from './action-bar.vue'
 import Breadcrumbs from './breadcrumbs.vue'
 import WindowControls from './window-controls.vue'
@@ -33,6 +35,12 @@ const messages = defineMessages({
 		class="app-title-bar relative z-[2] flex bg-bg-raised pl-1 [grid-area:status] [.mac-traffic-lights_&]:pl-20"
 	>
 		<div data-tauri-drag-region class="flex min-w-0 flex-1 items-center overflow-hidden p-2">
+			<img
+				:src="launcherIcon"
+				alt=""
+				class="mr-2 size-7 shrink-0 pointer-events-none select-none"
+				draggable="false"
+			/>
 			<span
 				class="shrink-0 text-xl font-extrabold leading-7 text-contrast pointer-events-none select-none"
 			>

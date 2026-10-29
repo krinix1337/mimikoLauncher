@@ -2,6 +2,7 @@
 	<Transition name="splash-fade" @after-leave="onAfterLeave">
 		<div v-if="!doneLoading" class="splash-screen" :class="`${theme.active}-mode`">
 			<div class="app-logo-wrapper" data-tauri-drag-region>
+				<img :src="launcherIcon" alt="" class="app-icon" draggable="false" />
 				<span class="app-logo" data-tauri-drag-region>mimiko<span class="text-brand">Launcher</span></span>
 				<ProgressBar class="loading-bar" :progress="Math.min(loadingProgress, 100)" />
 				<span v-if="message">{{ message }}</span>
@@ -29,6 +30,7 @@
 import { injectLoadingState } from '@modrinth/ui'
 import { onMounted, ref, watch } from 'vue'
 
+import launcherIcon from '@/assets/launcher-icon.png'
 import AppBackground from '@/components/ui/AppBackground.vue'
 import ProgressBar from '@/components/ui/ProgressBar.vue'
 import { useBackground } from '@/composables/use-background'
@@ -136,6 +138,13 @@ useAppEvent('loading', (e) => {
 	color: var(--color-contrast);
 
 	z-index: 9998;
+}
+
+.app-icon {
+	width: 5rem;
+	height: 5rem;
+	user-select: none;
+	pointer-events: none;
 }
 
 .app-logo {

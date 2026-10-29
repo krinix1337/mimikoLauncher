@@ -28,6 +28,7 @@ import { getVersion } from '@tauri-apps/api/app'
 import { platform as getOsPlatform, version as getOsVersion } from '@tauri-apps/plugin-os'
 import { computed, ref } from 'vue'
 
+import launcherIcon from '@/assets/launcher-icon.png'
 import { useAppSettings } from '@/composables/use-app-settings.ts'
 import AppearanceSettings from '@/features/settings/display/appearance-settings.vue'
 import BehaviorSettings from '@/features/settings/display/behavior-settings.vue'
@@ -383,7 +384,14 @@ const messages = defineMessages({
 						}"
 						@click="devModeCount"
 					>
-						<span aria-hidden="true" class="block w-6 h-6 text-xl font-extrabold leading-6">m</span>
+						<img
+							:src="launcherIcon"
+							alt=""
+							aria-hidden="true"
+							class="block size-8 rounded-lg"
+							:class="{ 'ring-2 ring-brand': appSettings.devMode }"
+							draggable="false"
+						/>
 					</button>
 					<div v-if="appInfo" class="max-w-[200px]">
 						<p class="m-0">

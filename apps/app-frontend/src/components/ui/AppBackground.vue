@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useElementSize } from '@vueuse/core'
+import { useDocumentVisibility, useElementSize } from '@vueuse/core'
 import { computed, ref, watch } from 'vue'
 
 import {
@@ -34,6 +34,7 @@ const FACE_TRANSFORMS = [
 
 const root = ref<HTMLElement>()
 const { width, height } = useElementSize(root)
+const visibility = useDocumentVisibility()
 
 const imageUrl = ref<string | null>(null)
 const panoramaFaces = ref<string[] | null>(null)
@@ -118,7 +119,10 @@ const layerStyle = computed(() => ({
 			>
 				<div
 					class="app-background__camera"
-					:class="{ 'app-background__camera--rotating': rotate }"
+					:class="{
+						'app-background__camera--rotating': rotate,
+						'app-background__camera--paused': visibility === 'hidden',
+					}"
 					:style="{ '--panorama-distance': `${perspective}px` }"
 				>
 					<img
@@ -154,6 +158,7 @@ const layerStyle = computed(() => ({
 	border-top-left-radius: var(--radius-xl);
 	pointer-events: none;
 	user-select: none;
+	contain: strict;
 }
 
 .app-background__layer {
@@ -189,6 +194,11 @@ const layerStyle = computed(() => ({
 
 .app-background__camera--rotating {
 	animation: app-background-pan 240s linear infinite;
+	will-change: transform;
+}
+
+.app-background__camera--paused {
+	animation-play-state: paused;
 }
 
 .app-background__face {
