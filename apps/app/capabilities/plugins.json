@@ -41,6 +41,9 @@
 					"url": "https://launchercontent.mojang.com/*"
 				},
 				{
+					"url": "https://www.minecraft.net/*"
+				},
+				{
 					"url": "https://fill.papermc.io/*"
 				},
 				{

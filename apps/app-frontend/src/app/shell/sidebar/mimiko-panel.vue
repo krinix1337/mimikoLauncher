@@ -2,9 +2,9 @@
 import { PlayIcon, StopCircleIcon } from '@modrinth/assets'
 import { injectNotificationManager } from '@modrinth/ui'
 import { fetch as tauriFetch } from '@tauri-apps/plugin-http'
-import { openUrl } from '@tauri-apps/plugin-opener'
 import dayjs from 'dayjs'
 import { onMounted, onScopeDispose, ref } from 'vue'
+import { useRouter } from 'vue-router'
 
 import { useAppEvent } from '@/composables/use-app-event'
 import { get_many } from '@/helpers/instance'
@@ -37,6 +37,7 @@ interface NewsEntry {
 }
 
 const { handleError } = injectNotificationManager()
+const router = useRouter()
 const running = ref<RunningGame[]>([])
 const recent = ref<(WorldWithInstance & { instanceName: string })[]>([])
 const news = ref<NewsEntry[]>([])
@@ -94,6 +95,10 @@ async function joinWorld(world: WorldWithInstance) {
 	} catch (error) {
 		handleError(error)
 	}
+}
+
+function openNews(url: string) {
+	void router.push({ path: '/news', query: { url } })
 }
 
 function newsImage(entry: NewsEntry): string | null {
@@ -162,7 +167,7 @@ onMounted(() => {
 			:key="entry.id"
 			type="button"
 			class="news-card"
-			@click="openUrl(entry.readMoreLink)"
+			@click="openNews(entry.readMoreLink)"
 		>
 			<img v-if="newsImage(entry)" :src="newsImage(entry)!" alt="" class="news-image" />
 			<span class="block px-3 pt-2 font-semibold text-contrast">{{ entry.title.trim() }}</span>

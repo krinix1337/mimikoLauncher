@@ -32,6 +32,11 @@ export default new createRouter({
 			component: () => import('@/pages/Screenshots.vue'),
 		},
 		{
+			path: '/news',
+			name: 'News',
+			component: () => import('@/pages/News.vue'),
+		},
+		{
 			path: '/:projectType(mod|plugin|datapack|resourcepack|shader|modpack)/:id/:rest(.*)*',
 			redirect: (to) => {
 				const rest = to.params.rest ? `/${[].concat(to.params.rest).join('/')}` : ''
