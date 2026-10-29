@@ -7,12 +7,7 @@
 <br />
 <br />
 
-[![Релиз](https://img.shields.io/github/v/release/krinix1337/mimikoLauncher?style=for-the-badge&label=%D1%80%D0%B5%D0%BB%D0%B8%D0%B7&labelColor=211F26&color=D0BCFF)](https://github.com/krinix1337/mimikoLauncher/releases/latest)
-[![Windows](https://img.shields.io/badge/Windows-10%20%7C%2011-D0BCFF?style=for-the-badge&logo=windows&logoColor=D0BCFF&labelColor=211F26)](https://github.com/krinix1337/mimikoLauncher/releases/latest)
-[![Tauri](https://img.shields.io/badge/Tauri-2-EFB8C8?style=for-the-badge&logo=tauri&logoColor=EFB8C8&labelColor=211F26)](https://tauri.app)
-[![Rust](https://img.shields.io/badge/Rust-1.95-EFB8C8?style=for-the-badge&logo=rust&logoColor=EFB8C8&labelColor=211F26)](https://www.rust-lang.org)
-[![Vue](https://img.shields.io/badge/Vue-3-CCC2DC?style=for-the-badge&logo=vuedotjs&logoColor=CCC2DC&labelColor=211F26)](https://vuejs.org)
-[![Лицензия](https://img.shields.io/badge/GPL--3.0-CCC2DC?style=for-the-badge&label=%D0%BB%D0%B8%D1%86%D0%B5%D0%BD%D0%B7%D0%B8%D1%8F&labelColor=211F26)](apps/app/LICENSE)
+[![Релиз](https://img.shields.io/badge/v1.0.0-D0BCFF?style=for-the-badge&label=%D1%80%D0%B5%D0%BB%D0%B8%D0%B7&labelColor=211F26)](https://github.com/krinix1337/mimikoLauncher/releases/latest) [![Windows](https://img.shields.io/badge/Windows-10%20%7C%2011-D0BCFF?style=for-the-badge&logo=windows&logoColor=D0BCFF&labelColor=211F26)](https://github.com/krinix1337/mimikoLauncher/releases/latest) [![Tauri](https://img.shields.io/badge/Tauri-2-EFB8C8?style=for-the-badge&logo=tauri&logoColor=EFB8C8&labelColor=211F26)](https://tauri.app) [![Rust](https://img.shields.io/badge/Rust-1.95-EFB8C8?style=for-the-badge&logo=rust&logoColor=EFB8C8&labelColor=211F26)](https://www.rust-lang.org) [![Vue](https://img.shields.io/badge/Vue-3-CCC2DC?style=for-the-badge&logo=vuedotjs&logoColor=CCC2DC&labelColor=211F26)](https://vuejs.org) [![Лицензия](https://img.shields.io/badge/GPL--3.0-CCC2DC?style=for-the-badge&label=%D0%BB%D0%B8%D1%86%D0%B5%D0%BD%D0%B7%D0%B8%D1%8F&labelColor=211F26)](apps/app/LICENSE)
 
 **[Скачать](https://github.com/krinix1337/mimikoLauncher/releases/latest)** &nbsp;·&nbsp; **[Возможности](#-возможности)** &nbsp;·&nbsp; **[Скриншоты](#-скриншоты)** &nbsp;·&nbsp; **[Установка](#-установка)** &nbsp;·&nbsp; **[mimiko.fun](https://mimiko.fun)**
 
