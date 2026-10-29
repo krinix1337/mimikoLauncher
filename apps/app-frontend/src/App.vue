@@ -64,6 +64,7 @@ import ModpackAlreadyInstalledModal from '@/components/ui/modal/ModpackAlreadyIn
 import ModrinthAccountRequiredModal from '@/components/ui/modal/ModrinthAccountRequiredModal.vue'
 import UpdateToPlayModal from '@/components/ui/modal/UpdateToPlayModal.vue'
 import AppBackground from '@/components/ui/AppBackground.vue'
+import FrameGlass from '@/components/ui/FrameGlass.vue'
 import NavButton from '@/components/ui/NavButton.vue'
 import { useBackground } from '@/composables/use-background'
 import QuickInstanceSwitcher from '@/components/ui/QuickInstanceSwitcher.vue'
@@ -1863,6 +1864,7 @@ provideAppUpdateDownloadProgress(appUpdateDownload)
 				:blur="background.blur"
 				:rotate="background.rotate"
 			/>
+			<FrameGlass />
 		</div>
 	</Transition>
 	<div

@@ -251,7 +251,31 @@ provideAppearanceSettings({
 </script>
 
 <template>
-	<AppearanceSettingsLayout />
+	<AppearanceSettingsLayout>
+		<template #advanced-rendering="{ enabled }">
+			<div class="flex flex-col gap-2.5" :class="{ 'frame-blur--disabled': !enabled }">
+				<div>
+					<h3 class="m-0 text-base font-semibold text-contrast">Сила размытия</h3>
+					<p class="m-0 mt-1 text-secondary">
+						{{
+							enabled
+								? 'Насколько сильно панели, меню и окна размывают то, что под ними.'
+								: 'Включи «Расширенные эффекты», чтобы настроить размытие.'
+						}}
+					</p>
+				</div>
+				<Slider
+					id="frame-blur"
+					v-model="background.frameBlur"
+					:min="0"
+					:max="60"
+					:step="2"
+					unit="px"
+					:disabled="!enabled"
+				/>
+			</div>
+		</template>
+	</AppearanceSettingsLayout>
 	<div class="mt-6">
 		<h2 class="m-0 text-lg font-semibold text-contrast">Цвет Material 3</h2>
 		<p class="m-0 mt-1 text-secondary">
@@ -377,24 +401,6 @@ provideAppearanceSettings({
 				<Slider id="background-dim" v-model="background.dim" :min="0" :max="90" :step="5" unit="%" />
 			</div>
 			<div class="mt-4 flex flex-col gap-2.5">
-				<h3 class="m-0 text-base font-semibold text-contrast">Размытие панелей</h3>
-				<p class="m-0 text-secondary">
-					Насколько сильно заголовок, полоса слева и панель справа размывают фон.
-					<template v-if="!theme.advancedRendering">
-						Работает при включённых «Расширенных эффектах».
-					</template>
-				</p>
-				<Slider
-					id="background-frame-blur"
-					v-model="background.frameBlur"
-					:min="0"
-					:max="60"
-					:step="2"
-					unit="px"
-					:disabled="!theme.advancedRendering"
-				/>
-			</div>
-			<div class="mt-4 flex flex-col gap-2.5">
 				<h3 class="m-0 text-base font-semibold text-contrast">Размытие фона</h3>
 				<Slider id="background-blur" v-model="background.blur" :min="0" :max="24" :step="1" unit="px" />
 			</div>
@@ -465,6 +471,11 @@ provideAppearanceSettings({
 	box-shadow:
 		0 0 0 2px var(--color-bg),
 		0 0 0 4px var(--color-contrast);
+}
+
+.frame-blur--disabled {
+	opacity: 0.45;
+	pointer-events: none;
 }
 
 .bg-grid {

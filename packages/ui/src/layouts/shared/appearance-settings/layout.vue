@@ -113,6 +113,7 @@ const sidebarPreferenceValues = sidebarPreferences?.value
 						/>
 					</template>
 				</AppearanceSettingRow>
+				<slot name="advanced-rendering" :enabled="advancedRendering" />
 
 				<AppearanceSettingRow
 					v-if="externalLinksNewTab"

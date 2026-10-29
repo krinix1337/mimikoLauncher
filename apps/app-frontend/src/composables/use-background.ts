@@ -138,12 +138,46 @@ export function useBackground() {
 
 const panoramaCache = new Map<string, Promise<string[]>>()
 
+const RESOLVED_KEY = 'mimiko-background-resolved'
+
+function readResolved(): Record<string, string[]> {
+	try {
+		return JSON.parse(window.localStorage.getItem(RESOLVED_KEY) ?? '{}') ?? {}
+	} catch {
+		return {}
+	}
+}
+
+function rememberResolved(key: string, urls: string[]) {
+	try {
+		window.localStorage.setItem(RESOLVED_KEY, JSON.stringify({ ...readResolved(), [key]: urls }))
+	} catch {
+		// storage blocked or full
+	}
+}
+
+/**
+ * URLs a background resolved to last time, available before the launcher backend has started so
+ * the splash screen can show the background right away.
+ */
+export function getResolvedBackground(source: BackgroundSource): string[] | null {
+	if (source.kind === 'preset') {
+		const preset = BACKGROUND_PRESETS.find((entry) => entry.id === source.id)
+		return preset ? [preset.url] : null
+	}
+	if (source.kind === 'none') return null
+	return readResolved()[JSON.stringify(source)] ?? null
+}
+
 /** URLs of the six panorama faces in Minecraft order: front, right, back, left, top, bottom. */
 export function getPanorama(id: string): Promise<string[]> {
 	let faces = panoramaCache.get(id)
 	if (!faces) {
 		faces = invoke<string[]>('plugin:utils|background_panorama', { id })
-		faces.catch(() => panoramaCache.delete(id))
+		faces.then(
+			(urls) => rememberResolved(JSON.stringify({ kind: 'panorama', id }), urls),
+			() => panoramaCache.delete(id),
+		)
 		panoramaCache.set(id, faces)
 	}
 	return faces
@@ -153,8 +187,10 @@ export function importBackground(path: string): Promise<string> {
 	return invoke<string>('plugin:utils|background_import', { path })
 }
 
-export function getCustomBackgroundUrl(name: string): Promise<string> {
-	return invoke<string>('plugin:utils|background_custom_url', { name })
+export async function getCustomBackgroundUrl(name: string): Promise<string> {
+	const url = await invoke<string>('plugin:utils|background_custom_url', { name })
+	rememberResolved(JSON.stringify({ kind: 'custom', name }), [url])
+	return url
 }
 
 /** Image URLs a background is drawn from, for color extraction. */

@@ -7,6 +7,7 @@ import {
 	type BackgroundSource,
 	getCustomBackgroundUrl,
 	getPanorama,
+	getResolvedBackground,
 } from '@/composables/use-background'
 
 const props = withDefaults(
@@ -51,6 +52,12 @@ watch(
 		const current = ++request
 		const source = props.source
 		loaded.value = false
+		const cached = getResolvedBackground(source)
+		if (cached) {
+			imageUrl.value = source.kind === 'panorama' ? null : cached[0]
+			panoramaFaces.value = source.kind === 'panorama' ? cached : null
+			if (source.kind === 'panorama') loaded.value = true
+		}
 		let image: string | null = null
 		let faces: string[] | null = null
 		try {

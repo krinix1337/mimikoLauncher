@@ -1,5 +1,5 @@
-// The launcher frame over a background image: the title bar, the navigation rail and the right
-// panel let the background through, frosted when advanced rendering is on.
+// The launcher over a background image. The title bar, navigation rail and right panel sit on one
+// shared glass layer (FrameGlass), and with advanced rendering every floating surface is frosted.
 
 .app-wallpaper {
 	position: fixed;
@@ -14,16 +14,23 @@
 
 body.mimiko-wallpaper {
 	--frame-tint: color-mix(in srgb, var(--color-raised-bg) 62%, transparent);
+	--glass-tint: color-mix(in srgb, var(--color-raised-bg) 72%, transparent);
 
 	.app-grid-layout,
-	.app-contents {
+	.app-contents,
+	.app-grid-navbar,
+	.app-title-bar,
+	.app-sidebar,
+	.window-controls {
 		background: transparent !important;
 	}
 
-	.app-grid-navbar,
-	.app-title-bar,
+	.app-contents::before {
+		border-color: transparent;
+	}
+
 	.app-sidebar {
-		background: var(--frame-tint) !important;
+		border-left-color: transparent !important;
 	}
 
 	.sidebar-scroll-fade {
@@ -43,11 +50,27 @@ body.mimiko-wallpaper {
 }
 
 body.mimiko-glass {
-	--frame-tint: color-mix(in srgb, var(--color-raised-bg) 38%, transparent);
+	--frame-tint: color-mix(in srgb, var(--color-raised-bg) 40%, transparent);
 
-	.app-grid-navbar,
-	.app-title-bar,
-	.app-sidebar {
+	.frame-glass {
+		backdrop-filter: blur(var(--frame-blur, 28px)) saturate(1.6);
+	}
+
+	.app-viewport {
+		.card,
+		[class*='bg-bg-raised'],
+		[class*='bg-surface-2'],
+		[class*='bg-surface-3'],
+		[class*='bg-surface-4'],
+		[class*='bg-button-bg'] {
+			backdrop-filter: blur(var(--frame-blur, 28px)) saturate(1.4);
+		}
+	}
+
+	.v-popper--theme-dropdown .v-popper__inner,
+	[role='menu'],
+	.fixed:has(> .combobox-options-scrollbar) {
+		background-color: var(--glass-tint) !important;
 		backdrop-filter: blur(var(--frame-blur, 28px)) saturate(1.6);
 	}
 }
