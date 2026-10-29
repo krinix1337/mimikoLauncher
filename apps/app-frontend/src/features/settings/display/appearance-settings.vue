@@ -11,6 +11,12 @@ import { platform } from '@tauri-apps/plugin-os'
 import { computed, onBeforeUnmount, onMounted, watch } from 'vue'
 
 import { useAppSettings } from '@/composables/use-app-settings.ts'
+import {
+	M3_PRESETS,
+	type M3Palette,
+	previewColor,
+	useM3Palette,
+} from '@/composables/use-m3-palette.ts'
 import { useNavLabels } from '@/composables/use-nav-labels.ts'
 import { type ColorTheme, isDarkTheme, useTheme } from '@/composables/use-theme.ts'
 import { injectAppSettingsModal } from '@/features/settings/app-settings-modal/context'
@@ -23,6 +29,16 @@ const { updatePreferences } = injectUserPreferences()
 const settingsModal = injectAppSettingsModal()
 const os = platform()
 const showNavLabels = useNavLabels()
+const m3Palette = useM3Palette()
+
+function isSelected(palette: M3Palette): boolean {
+	return (
+		m3Palette.value.monochrome === palette.monochrome &&
+		m3Palette.value.seed.toLowerCase() === palette.seed.toLowerCase()
+	)
+}
+
+const isCustom = computed(() => !M3_PRESETS.some((preset) => isSelected(preset.palette)))
 
 type AppearanceSettingsState = {
 	theme: ColorTheme
@@ -162,6 +178,34 @@ provideAppearanceSettings({
 
 <template>
 	<AppearanceSettingsLayout />
+	<div class="mt-6">
+		<h2 class="m-0 text-lg font-semibold text-contrast">Цвет Material 3</h2>
+		<p class="m-0 mt-1 text-secondary">
+			Вся палитра темы строится из одного цвета, как в Android. «Чёрный» делает тему без цветных
+			акцентов.
+		</p>
+		<div class="mt-3 flex flex-wrap items-center gap-2">
+			<button
+				v-for="preset in M3_PRESETS"
+				:key="preset.name"
+				v-tooltip="preset.name"
+				type="button"
+				class="m3-swatch"
+				:class="{ 'm3-swatch--selected': isSelected(preset.palette) }"
+				:style="{ '--swatch': previewColor(preset.palette, true) }"
+				:aria-label="preset.name"
+				@click="m3Palette = { ...preset.palette }"
+			/>
+			<label v-tooltip="'Свой цвет'" class="m3-swatch m3-swatch--custom" :class="{ 'm3-swatch--selected': isCustom }">
+				<input
+					type="color"
+					:value="m3Palette.seed"
+					aria-label="Свой цвет"
+					@input="m3Palette = { seed: ($event.target as HTMLInputElement).value, monochrome: false }"
+				/>
+			</label>
+		</div>
+	</div>
 	<div class="mt-6 flex items-center justify-between gap-4">
 		<div>
 			<h2 class="m-0 text-lg font-semibold text-contrast">Подписи в боковой панели</h2>
@@ -172,3 +216,38 @@ provideAppearanceSettings({
 		<Toggle id="nav-labels" v-model="showNavLabels" />
 	</div>
 </template>
+
+<style scoped>
+.m3-swatch {
+	position: relative;
+	width: 2.5rem;
+	height: 2.5rem;
+	padding: 0;
+	border: 2px solid var(--color-divider);
+	border-radius: 9999px;
+	background: var(--swatch);
+	cursor: pointer;
+	transition:
+		border-radius 0.35s cubic-bezier(0.42, 1.67, 0.21, 0.9),
+		box-shadow 0.2s ease;
+}
+
+.m3-swatch--selected {
+	border-radius: 12px;
+	box-shadow:
+		0 0 0 2px var(--color-bg),
+		0 0 0 4px var(--color-contrast);
+}
+
+.m3-swatch--custom {
+	overflow: hidden;
+	background: conic-gradient(red, yellow, lime, aqua, blue, magenta, red);
+
+	input {
+		position: absolute;
+		inset: 0;
+		opacity: 0;
+		cursor: pointer;
+	}
+}
+</style>
