@@ -89,6 +89,7 @@
 					v-model="newLauncherPath"
 					:placeholder="formatMessage(messages.launcherPathPlaceholder)"
 					class="flex-1"
+					@keydown.enter.prevent="addLauncherPath"
 				/>
 				<Button :disabled="!newLauncherPath.trim()" @click="addLauncherPath">
 					{{ formatMessage(messages.add) }}
@@ -299,6 +300,7 @@ async function browseForLauncherPath() {
 	const path = await importProvider.selectDirectory()
 	if (path) {
 		newLauncherPath.value = path
+		await addLauncherPath()
 	}
 }
 
@@ -324,6 +326,12 @@ async function addLauncherPath() {
 			instances,
 		}
 		ctx.importLaunchers.value = [...ctx.importLaunchers.value, launcher]
+		if (instances.length === 1) {
+			ctx.importSelectedInstances.value = {
+				...ctx.importSelectedInstances.value,
+				[launcher.name]: new Set(instances),
+			}
+		}
 		expandedLaunchers.value.add(launcher.name)
 		expandedLaunchers.value = new Set(expandedLaunchers.value)
 	} catch {
