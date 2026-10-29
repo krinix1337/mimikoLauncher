@@ -69,6 +69,7 @@ const messages = defineMessages({
 		<section data-tauri-drag-region class="flex shrink-0 ml-auto items-center">
 			<IconButton
 				v-if="showSidebarToggle"
+				v-tooltip="sidebarToggled ? 'Скрыть панель справа' : 'Показать панель справа'"
 				:type="sidebarToggled ? 'base' : 'quiet'"
 				:label="formatMessage(messages.nextImage)"
 				class="mr-3 transition-transform"

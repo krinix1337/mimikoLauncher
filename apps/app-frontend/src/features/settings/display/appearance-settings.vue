@@ -224,12 +224,12 @@ provideAppearanceSettings({
 	height: 2.5rem;
 	padding: 0;
 	border: 2px solid var(--color-divider);
-	border-radius: 9999px;
+	border-radius: 50%;
 	background: var(--swatch);
 	cursor: pointer;
 	transition:
-		border-radius 0.35s cubic-bezier(0.42, 1.67, 0.21, 0.9),
-		box-shadow 0.2s ease;
+		border-radius 0.3s cubic-bezier(0.34, 0.8, 0.34, 1),
+		box-shadow 0.2s cubic-bezier(0.34, 0.8, 0.34, 1);
 }
 
 .m3-swatch--selected {

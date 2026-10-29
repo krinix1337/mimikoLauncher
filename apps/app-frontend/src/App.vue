@@ -205,7 +205,22 @@ const INTERCOM_BUBBLE_DEFAULT_PADDING = 20
 const credentials = ref()
 const storedModrinthAccounts = ref([])
 let credentialsRefreshId = 0
-const sidebarToggled = ref(true)
+const RIGHT_PANEL_KEY = 'mimiko-right-panel'
+const sidebarToggled = ref(readRightPanelOpen())
+function readRightPanelOpen() {
+	try {
+		return window.localStorage.getItem(RIGHT_PANEL_KEY) === 'true'
+	} catch {
+		return false
+	}
+}
+watch(sidebarToggled, (open) => {
+	try {
+		window.localStorage.setItem(RIGHT_PANEL_KEY, String(open))
+	} catch {
+		// storage blocked or full
+	}
+})
 watch(
 	() => appSettings.toggleSidebar,
 	(toggleSidebar) => {
@@ -1938,7 +1953,7 @@ provideAppUpdateDownloadProgress(appUpdateDownload)
 		<AppTitleBar
 			:can-navigate-back="canNavigateBack"
 			:can-navigate-forward="canNavigateForward"
-			:show-sidebar-toggle="!forceSidebar && appSettings.toggleSidebar"
+			:show-sidebar-toggle="!forceSidebar"
 			:sidebar-toggled="sidebarToggled"
 			@toggle-sidebar="sidebarToggled = !sidebarToggled"
 		/>

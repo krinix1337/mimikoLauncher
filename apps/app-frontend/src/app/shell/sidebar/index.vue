@@ -10,6 +10,7 @@ import OnboardingChecklist from '@/features/onboarding/checklist.vue'
 import type { ModrinthCredentials } from '@/helpers/mr_auth'
 import { injectOnboardingChecklist } from '@/providers/onboarding-checklist'
 
+import MimikoPanel from './mimiko-panel.vue'
 import Promotion from './promotion.vue'
 
 const props = defineProps<{
@@ -116,6 +117,7 @@ const messages = defineMessages({
 							<AccountsCard ref="accounts" />
 						</Suspense>
 					</div>
+					<MimikoPanel v-if="visible" />
 				</div>
 			</div>
 			<div
