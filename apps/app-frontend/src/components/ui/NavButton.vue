@@ -14,6 +14,7 @@
 		@click="onClick"
 	>
 		<slot />
+		<span v-if="label" class="nav-button__label">{{ label }}</span>
 	</component>
 </template>
 
@@ -33,6 +34,8 @@ const props = withDefaults(
 		isSubpage?: RouteFunction
 		highlightOverride?: boolean
 		disabled?: boolean
+		/** Text shown under the icon by themes that label navigation items. */
+		label?: string
 	}>(),
 	{
 		disabled: false,
@@ -69,6 +72,10 @@ defineOptions({
 			opacity 0.25s var(--ease-out-expo),
 			scale 0.25s var(--ease-out-expo);
 	}
+}
+
+.nav-button__label {
+	display: none;
 }
 
 .router-link-active,

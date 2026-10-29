@@ -558,6 +558,18 @@ const messages = defineMessages({
 		id: 'app.nav.mimiko.sign-in',
 		defaultMessage: 'Вход: ник, Ely.by или Microsoft',
 	},
+	browseShort: {
+		id: 'app.nav.mimiko.browse-short',
+		defaultMessage: 'Моды',
+	},
+	skinsShort: {
+		id: 'app.nav.mimiko.skins-short',
+		defaultMessage: 'Скины',
+	},
+	accountShort: {
+		id: 'app.nav.mimiko.account-short',
+		defaultMessage: 'Аккаунт',
+	},
 	modrinthHosting: {
 		id: 'app.nav.modrinth-hosting',
 		defaultMessage: 'Modrinth Hosting',
@@ -1860,6 +1872,7 @@ provideAppUpdateDownloadProgress(appUpdateDownload)
 		>
 			<NavButton
 				v-tooltip.right="formatMessage(messages.home)"
+				:label="formatMessage(messages.home)"
 				to="/"
 				:is-primary="(route) => route.path === '/'"
 				:is-subpage="
@@ -1871,6 +1884,7 @@ provideAppUpdateDownloadProgress(appUpdateDownload)
 			</NavButton>
 			<NavButton
 				v-tooltip.right="formatMessage(commonMessages.discoverContentLabel)"
+				:label="formatMessage(messages.browseShort)"
 				to="/browse/modpack"
 				:is-primary="() => route.path.startsWith('/browse') && !route.query.i && !route.query.sid"
 				:is-subpage="
@@ -1882,6 +1896,7 @@ provideAppUpdateDownloadProgress(appUpdateDownload)
 			<NavButton
 				v-if="appSettings.showSkinSelectorInSidebar"
 				v-tooltip.right="formatMessage(appMessages.skinSelectorLabel)"
+				:label="formatMessage(messages.skinsShort)"
 				to="/skins"
 			>
 				<ShirtIcon />
@@ -1889,6 +1904,7 @@ provideAppUpdateDownloadProgress(appUpdateDownload)
 			<NavButton
 				v-if="globalSyncedOptionsQuery.data.value?.screenshots"
 				v-tooltip.right="formatMessage(messages.screenshots)"
+				:label="formatMessage(messages.screenshots)"
 				to="/screenshots"
 			>
 				<ImageIcon />
@@ -1906,12 +1922,14 @@ provideAppUpdateDownloadProgress(appUpdateDownload)
 			</suspense>
 			<NavButton
 				v-tooltip.right="formatMessage(commonMessages.settingsLabel)"
+				:label="formatMessage(commonMessages.settingsLabel)"
 				:to="settingsActions.openSettings"
 			>
 				<SettingsIcon />
 			</NavButton>
 			<NavButton
 				v-tooltip.right="formatMessage(messages.signInToGame)"
+				:label="formatMessage(messages.accountShort)"
 				:to="() => minecraftRequiredModal?.show()"
 			>
 				<UserIcon />
