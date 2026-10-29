@@ -67,6 +67,12 @@
 			"identifier": "fs:scope",
 			"allow": [
 				{
+					"path": "$DATA/mimikoLauncher/profiles"
+				},
+				{
+					"path": "$DATA/mimikoLauncher/profiles/**"
+				},
+				{
 					"path": "$APPDATA/profiles"
 				},
 				{
