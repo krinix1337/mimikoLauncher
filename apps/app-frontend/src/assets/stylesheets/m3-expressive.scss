@@ -429,30 +429,26 @@
 	}
 
 	/*
-	 * Text fields: the M3 filled text field, a tinted container with rounded top corners and an
-	 * active indicator line that turns primary and thicker on focus. Search fields become the full
-	 * round search bar.
+	 * Text fields: the M3 outlined text field, a quiet container with an outline that brightens on
+	 * hover and turns primary and thicker on focus. Search fields become the full round search bar.
 	 */
 	[class*='group/input'] {
 		border: none !important;
-		border-radius: var(--md-shape-xs) var(--md-shape-xs) 0 0 !important;
-		background-color: var(--md-surface-container-highest) !important;
-		box-shadow: inset 0 -1px 0 var(--md-on-surface-variant) !important;
+		border-radius: var(--md-shape-md) !important;
+		background-color: color-mix(in srgb, var(--md-surface-container-highest) 55%, transparent) !important;
+		box-shadow: inset 0 0 0 1px var(--md-outline-variant) !important;
 		transition:
 			background-color 0.15s var(--md-effects),
 			box-shadow 0.15s var(--md-effects),
 			border-radius 0.35s var(--md-spatial-fast) !important;
 
 		&:hover {
-			background-image: linear-gradient(
-				color-mix(in srgb, var(--md-on-surface) var(--md-state-hover), transparent) 0 0
-			);
-			box-shadow: inset 0 -1px 0 var(--md-on-surface) !important;
+			box-shadow: inset 0 0 0 1px var(--md-outline) !important;
 		}
 
 		&:focus-within {
 			--tw-ring-shadow: 0 0 #0000 !important;
-			box-shadow: inset 0 -2px 0 var(--md-primary) !important;
+			box-shadow: inset 0 0 0 2px var(--md-primary) !important;
 		}
 
 		input::placeholder {

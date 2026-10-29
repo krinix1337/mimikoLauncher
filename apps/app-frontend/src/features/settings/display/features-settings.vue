@@ -249,34 +249,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-	<section class="border-0 border-b border-solid border-surface-4 pb-6">
-		<div class="flex items-center justify-between gap-4">
-			<div>
-				<h2 id="sync-features-across-devices-label" class="m-0 text-lg font-semibold text-contrast">
-					{{ formatMessage(messages.syncAcrossDevicesTitle) }}
-				</h2>
-				<p class="m-0 mt-1 text-secondary">
-					{{ formatMessage(messages.syncAcrossDevicesDescription) }}
-				</p>
-			</div>
-			<span
-				v-tooltip="
-					!auth.user.value ? formatMessage(messages.syncAcrossDevicesSignedOutTooltip) : undefined
-				"
-				class="inline-flex shrink-0"
-			>
-				<Toggle
-					id="sync-features-across-devices"
-					:model-value="Boolean(auth.user.value) && current.syncFeaturesAcrossDevices"
-					:disabled="!auth.user.value"
-					aria-labelledby="sync-features-across-devices-label"
-					@update:model-value="current.syncFeaturesAcrossDevices = $event"
-				/>
-			</span>
-		</div>
-	</section>
-
-	<section class="mt-6">
+	<section>
 		<h2 class="m-0 text-xl font-semibold text-contrast">
 			{{ formatMessage(messages.instancePagesTitle) }}
 		</h2>
