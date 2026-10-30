@@ -92,9 +92,6 @@
   "app.action-bar.install.unknown-instance": {
     "message": "Неизвестная сборка"
   },
-  "app.install.phase.copying_files": {
-    "message": "Копирование файлов"
-  },
   "app.action-bar.install.updating-shared-content": {
     "message": "Обновление совместного контента"
   },
@@ -526,6 +523,9 @@
   },
   "app.hosting.update-required.title": {
     "message": "Обновите mimikoLauncher"
+  },
+  "app.install.phase.copying_files": {
+    "message": "Копирование файлов"
   },
   "app.install.phase.downloading_content": {
     "message": "Скачивание контента"
@@ -3529,6 +3529,15 @@
   },
   "app.updates-settings.last-checked": {
     "message": "Последняя проверка: {time}"
+  },
+  "app.updates-settings.repository.button": {
+    "message": "Открыть на GitHub"
+  },
+  "app.updates-settings.repository.description": {
+    "message": "Исходный код, релизы и сообщения об ошибках лаунчера."
+  },
+  "app.updates-settings.repository.title": {
+    "message": "GitHub"
   },
   "app.updates-settings.status.available": {
     "message": "Доступна версия {version}."

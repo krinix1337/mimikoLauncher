@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { DownloadIcon, RefreshCwIcon, RotateCounterClockwiseIcon } from '@modrinth/assets'
+import { DownloadIcon, ExternalIcon, GithubIcon, RefreshCwIcon, RotateCounterClockwiseIcon } from '@modrinth/assets'
 import { Button, defineMessages, ProgressBar, Toggle, useFormatBytes, useVIntl } from '@modrinth/ui'
 import { useQuery } from '@tanstack/vue-query'
 import { getVersion } from '@tauri-apps/api/app'
+import { openUrl } from '@tauri-apps/plugin-opener'
 import { computed } from 'vue'
 
 import {
@@ -13,6 +14,8 @@ import {
 	openAppUpdateChangelog,
 	setAppUpdateAutoCheck,
 } from '@/providers/app-update.ts'
+
+const LAUNCHER_REPOSITORY_URL = 'https://github.com/krinix1337/mimikoLauncher'
 
 const { formatMessage } = useVIntl()
 const formatBytes = useFormatBytes()
@@ -98,6 +101,18 @@ const messages = defineMessages({
 	changelogButton: {
 		id: 'app.updates-settings.changelog-button',
 		defaultMessage: 'Release notes',
+	},
+	repositoryTitle: {
+		id: 'app.updates-settings.repository.title',
+		defaultMessage: 'GitHub',
+	},
+	repositoryDescription: {
+		id: 'app.updates-settings.repository.description',
+		defaultMessage: 'Source code, releases and bug reports for the launcher.',
+	},
+	repositoryButton: {
+		id: 'app.updates-settings.repository.button',
+		defaultMessage: 'Open on GitHub',
 	},
 	autoCheckTitle: {
 		id: 'app.updates-settings.auto-check.title',
@@ -226,6 +241,22 @@ const autoCheck = computed({
 					aria-labelledby="auto-check-updates-label"
 					aria-describedby="auto-check-updates-description"
 				/>
+			</div>
+
+			<div class="flex items-center justify-between gap-4">
+				<div>
+					<h3 class="m-0 text-lg font-semibold text-contrast">
+						{{ formatMessage(messages.repositoryTitle) }}
+					</h3>
+					<p class="m-0 mt-1">
+						{{ formatMessage(messages.repositoryDescription) }}
+					</p>
+				</div>
+				<Button @click="openUrl(LAUNCHER_REPOSITORY_URL)">
+					<GithubIcon />
+					{{ formatMessage(messages.repositoryButton) }}
+					<ExternalIcon />
+				</Button>
 			</div>
 		</div>
 	</section>

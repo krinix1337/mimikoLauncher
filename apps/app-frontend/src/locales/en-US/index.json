@@ -92,9 +92,6 @@
   "app.action-bar.install.unknown-instance": {
     "message": "Unknown instance"
   },
-  "app.install.phase.copying_files": {
-    "message": "Copying files"
-  },
   "app.action-bar.install.updating-shared-content": {
     "message": "Updating shared content"
   },
@@ -526,6 +523,9 @@
   },
   "app.hosting.update-required.title": {
     "message": "mimikoLauncher update required"
+  },
+  "app.install.phase.copying_files": {
+    "message": "Copying files"
   },
   "app.install.phase.downloading_content": {
     "message": "Downloading content"
@@ -3550,6 +3550,15 @@
   },
   "app.updates-settings.last-checked": {
     "message": "Last checked: {time}"
+  },
+  "app.updates-settings.repository.button": {
+    "message": "Open on GitHub"
+  },
+  "app.updates-settings.repository.description": {
+    "message": "Source code, releases and bug reports for the launcher."
+  },
+  "app.updates-settings.repository.title": {
+    "message": "GitHub"
   },
   "app.updates-settings.status.available": {
     "message": "Version {version} is available."
