@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { useDocumentVisibility, useElementSize } from '@vueuse/core'
 import { computed, ref, watch } from 'vue'
+
+import PanoramaCanvas from '@/components/ui/PanoramaCanvas.vue'
 
 import {
 	BACKGROUND_PRESETS,
@@ -20,30 +21,12 @@ const props = withDefaults(
 	{ dim: 0, blur: 0, rotate: true },
 )
 
-const PANORAMA_FACE_SIZE = 1024
 const PANORAMA_FIELD_OF_VIEW = 85
-
-const FACE_TRANSFORMS = [
-	'translateZ(-512px)',
-	'rotateY(-90deg) translateZ(-512px)',
-	'rotateY(180deg) translateZ(-512px)',
-	'rotateY(90deg) translateZ(-512px)',
-	'rotateX(-90deg) translateZ(-512px)',
-	'rotateX(90deg) translateZ(-512px)',
-]
-
-const root = ref<HTMLElement>()
-const { width, height } = useElementSize(root)
-const visibility = useDocumentVisibility()
 
 const imageUrl = ref<string | null>(null)
 const panoramaFaces = ref<string[] | null>(null)
 const loaded = ref(false)
-
-const perspective = computed(() => {
-	const halfFov = (PANORAMA_FIELD_OF_VIEW * Math.PI) / 360
-	return Math.max(width.value, height.value * 1.6) / 2 / Math.tan(halfFov)
-})
+const readyPanorama = ref<string | null>(null)
 
 let request = 0
 
@@ -57,7 +40,6 @@ watch(
 		if (cached) {
 			imageUrl.value = source.kind === 'panorama' ? null : cached[0]
 			panoramaFaces.value = source.kind === 'panorama' ? cached : null
-			if (source.kind === 'panorama') loaded.value = true
 		}
 		let image: string | null = null
 		let faces: string[] | null = null
@@ -76,19 +58,10 @@ watch(
 		if (current !== request) return
 		imageUrl.value = image
 		panoramaFaces.value = faces
-		if (faces) await Promise.all(faces.map(preload))
-		if (current === request) loaded.value = true
+		if (!faces) loaded.value = true
 	},
 	{ immediate: true },
 )
-
-function preload(url: string) {
-	return new Promise<void>((resolve) => {
-		const image = new Image()
-		image.onload = image.onerror = () => resolve()
-		image.src = url
-	})
-}
 
 const layerStyle = computed(() => ({
 	filter: props.blur > 0 ? `blur(${props.blur}px)` : undefined,
@@ -97,7 +70,7 @@ const layerStyle = computed(() => ({
 </script>
 
 <template>
-	<div ref="root" class="app-background" aria-hidden="true">
+	<div class="app-background" aria-hidden="true">
 		<Transition name="app-background-fade">
 			<img
 				v-if="imageUrl"
@@ -110,36 +83,18 @@ const layerStyle = computed(() => ({
 				draggable="false"
 				@load="loaded = true"
 			/>
-			<div
+			<PanoramaCanvas
 				v-else-if="panoramaFaces"
 				:key="panoramaFaces[0]"
-				class="app-background__layer app-background__panorama"
-				:class="{ 'app-background__layer--hidden': !loaded }"
-				:style="{ ...layerStyle, perspective: `${perspective}px` }"
-			>
-				<div
-					class="app-background__camera"
-					:class="{
-						'app-background__camera--rotating': rotate,
-						'app-background__camera--paused': visibility === 'hidden',
-					}"
-					:style="{ '--panorama-distance': `${perspective}px` }"
-				>
-					<img
-						v-for="(face, index) in panoramaFaces"
-						:key="face"
-						:src="face"
-						alt=""
-						class="app-background__face"
-						:style="{
-							width: `${PANORAMA_FACE_SIZE}px`,
-							height: `${PANORAMA_FACE_SIZE}px`,
-							transform: `${FACE_TRANSFORMS[index]} scale(1.003)`,
-						}"
-						draggable="false"
-					/>
-				</div>
-			</div>
+				class="app-background__layer"
+				:class="{ 'app-background__layer--hidden': readyPanorama !== panoramaFaces[0] }"
+				:style="{ transform: layerStyle.transform }"
+				:faces="panoramaFaces"
+				:field-of-view="PANORAMA_FIELD_OF_VIEW"
+				:blur="blur"
+				:rotate="rotate"
+				@ready="readyPanorama = panoramaFaces[0]"
+			/>
 		</Transition>
 		<div
 			v-if="imageUrl || panoramaFaces"
@@ -177,39 +132,6 @@ const layerStyle = computed(() => ({
 	object-fit: cover;
 }
 
-.app-background__panorama {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	overflow: hidden;
-}
-
-.app-background__camera {
-	position: relative;
-	width: 0;
-	height: 0;
-	transform-style: preserve-3d;
-	transform: translateZ(var(--panorama-distance)) rotateX(-8deg) rotateY(0deg);
-}
-
-.app-background__camera--rotating {
-	animation: app-background-pan 240s linear infinite;
-	will-change: transform;
-}
-
-.app-background__camera--paused {
-	animation-play-state: paused;
-}
-
-.app-background__face {
-	position: absolute;
-	left: -512px;
-	top: -512px;
-	max-width: none;
-	backface-visibility: hidden;
-	image-rendering: auto;
-}
-
 .app-background__scrim {
 	position: absolute;
 	inset: 0;
@@ -229,20 +151,5 @@ const layerStyle = computed(() => ({
 
 .app-background-fade-leave-active {
 	transition: opacity 0.6s cubic-bezier(0.34, 0.8, 0.34, 1);
-}
-
-@keyframes app-background-pan {
-	from {
-		transform: translateZ(var(--panorama-distance)) rotateX(-8deg) rotateY(0deg);
-	}
-	to {
-		transform: translateZ(var(--panorama-distance)) rotateX(-8deg) rotateY(-360deg);
-	}
-}
-
-@media (prefers-reduced-motion: reduce) {
-	.app-background__camera--rotating {
-		animation: none;
-	}
 }
 </style>
