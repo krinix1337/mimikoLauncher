@@ -9,6 +9,7 @@ import { computed } from 'vue'
 import {
 	appUpdateState,
 	checkForAppUpdate,
+	formatAppVersion,
 	downloadAvailableAppUpdate,
 	installAvailableAppUpdate,
 	openAppUpdateChangelog,
@@ -36,8 +37,8 @@ const {
 } = appUpdateState
 
 const { data: currentVersion } = useQuery({
-	queryKey: ['app-info', 'version'],
-	queryFn: () => getVersion(),
+	queryKey: ['app-info', 'display-version'],
+	queryFn: async () => formatAppVersion(await getVersion()),
 	staleTime: Infinity,
 })
 
@@ -135,10 +136,14 @@ const statusText = computed(() => {
 		case 'up-to-date':
 			return formatMessage(messages.upToDate)
 		case 'available':
-			return formatMessage(messages.available, { version: availableUpdate.value?.version })
+			return formatMessage(messages.available, {
+				version: availableUpdate.value ? formatAppVersion(availableUpdate.value.version) : '',
+			})
 		default:
 			return availableUpdate.value
-				? formatMessage(messages.available, { version: availableUpdate.value.version })
+				? formatMessage(messages.available, {
+						version: formatAppVersion(availableUpdate.value.version),
+					})
 				: formatMessage(messages.idle)
 	}
 })

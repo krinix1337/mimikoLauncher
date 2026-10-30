@@ -45,6 +45,7 @@ import ResourceManagementSettings from '@/features/settings/system/resource-mana
 import TroubleshootingSettings from '@/features/settings/system/troubleshooting-settings.vue'
 import UpdatesSettings from '@/features/settings/system/updates-settings.vue'
 import { appSettingsKeys, appSettingsQueryOptions, set } from '@/helpers/settings.ts'
+import { formatAppVersion } from '@/providers/app-update.ts'
 import { injectAppUpdateDownloadProgress } from '@/providers/download-progress.ts'
 
 import { provideAppSettingsModal, type UnsavedChangesController } from './context'
@@ -406,7 +407,7 @@ const messages = defineMessages({
 					</button>
 					<div v-if="appInfo" class="max-w-[200px]">
 						<p class="m-0">
-							{{ formatMessage(messages.appVersion, { version: appInfo.version }) }}
+							{{ formatMessage(messages.appVersion, { version: formatAppVersion(appInfo.version) }) }}
 						</p>
 						<p class="m-0">
 							<span v-if="appInfo.osPlatform === 'macos'">{{ formatMessage(messages.macos) }}</span>

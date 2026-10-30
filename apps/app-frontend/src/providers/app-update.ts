@@ -1,5 +1,10 @@
 import { computed, ref } from 'vue'
 
+/** Shows a release version without a zero patch number, so 2.0.0 reads as 2.0. */
+export function formatAppVersion(version: string): string {
+	return version.replace(/^(d+.d+).0$/, '$1')
+}
+
 export const APP_UPDATE_POPUP_DELAY_MS = 24 * 60 * 60 * 1000
 
 const UPDATE_PROMPT_STORAGE_KEY = 'modrinth-app-update-prompt-state'
