@@ -51,8 +51,10 @@ import { RouterView, useRoute, useRouter } from 'vue-router'
 import { useRouteLoading } from '@/app/runtime/use-route-loading'
 import AppSidebar from '@/app/shell/sidebar/index.vue'
 import AppTitleBar from '@/app/shell/title-bar/index.vue'
+import AppBackground from '@/components/ui/AppBackground.vue'
 import { trackExternalFileDownload } from '@/components/ui/download-manager/external-file-downloads'
 import ErrorModal from '@/components/ui/ErrorModal.vue'
+import FrameGlass from '@/components/ui/FrameGlass.vue'
 import HostingUpdateRequired from '@/components/ui/HostingUpdateRequired.vue'
 import AddServerToInstanceModal from '@/components/ui/install_flow/AddServerToInstanceModal.vue'
 import UnknownPackWarningModal from '@/components/ui/install_flow/UnknownPackWarningModal.vue'
@@ -63,22 +65,19 @@ import InstallToPlayModal from '@/components/ui/modal/InstallToPlayModal.vue'
 import ModpackAlreadyInstalledModal from '@/components/ui/modal/ModpackAlreadyInstalledModal.vue'
 import ModrinthAccountRequiredModal from '@/components/ui/modal/ModrinthAccountRequiredModal.vue'
 import UpdateToPlayModal from '@/components/ui/modal/UpdateToPlayModal.vue'
-import AppBackground from '@/components/ui/AppBackground.vue'
-import FrameGlass from '@/components/ui/FrameGlass.vue'
 import NavButton from '@/components/ui/NavButton.vue'
-import { useBackground } from '@/composables/use-background'
 import QuickInstanceSwitcher from '@/components/ui/QuickInstanceSwitcher.vue'
 import SharedInstanceInviteHandler from '@/components/ui/shared-instances/shared-instance-invite-handler/index.vue'
 import SplashScreen from '@/components/ui/SplashScreen.vue'
 import { useCheckDisableMouseover } from '@/composables/macCssFix.js'
 import { useAppEvent } from '@/composables/use-app-event'
 import { useAppSettings } from '@/composables/use-app-settings.ts'
+import { useBackground } from '@/composables/use-background'
 import { useCrashHelper } from '@/composables/use-crash-helper'
 import { useError } from '@/composables/use-error.js'
 import { useInstanceMetadataRefresh } from '@/composables/use-instance-metadata-refresh'
 import { useQuickInstanceLimit } from '@/composables/use-quick-instance-limit.ts'
 import { isDarkTheme, useTheme } from '@/composables/use-theme.ts'
-import { useUpdateCheck } from '@/composables/use-update-check'
 import { config } from '@/config'
 import { provideMinecraftAccounts } from '@/features/minecraft-accounts/context'
 import AppSettingsModal from '@/features/settings/app-settings-modal/index.vue'
@@ -303,7 +302,6 @@ useCrashHelper({
 	openLogs: (instanceId) => void router.push(`/instance/${encodeURIComponent(instanceId)}/logs`),
 	appEvents,
 })
-useUpdateCheck({ notify: addPopupNotification })
 let adsConsentPopupId = null
 useAppEvent('ads_consent_required', handleAdsConsentRequired, appEvents)
 
@@ -1464,6 +1462,10 @@ const {
 	availableUpdate,
 	updateSize,
 	updatesEnabled,
+	checkStatus,
+	checkError,
+	lastCheckedAt,
+	autoCheckEnabled,
 } = appUpdateState
 let delayedUpdatePopupTimeout = null
 
@@ -1617,43 +1619,9 @@ async function checkUpdates() {
 		return
 	}
 
-	async function performCheck() {
-		const update = await invoke('plugin:updater|check')
-		if (!update) {
-			console.log('No update available')
-			return
-		}
-
-		const isExistingUpdate = update.version === availableUpdate.value?.version
-
-		if (isExistingUpdate) {
-			console.log('Update is already known')
-			scheduleDelayedUpdatePopup()
-			return
-		}
-
-		appUpdateDownload.progress.value = 0
-		finishedDownloading.value = false
-		downloading.value = false
-		updateSize.value = null
-		availableUpdate.value = update
-
-		console.log(`Update ${update.version} is available.`)
-
-		metered.value = await isNetworkMetered()
-		if (!metered.value) {
-			console.log('Starting download of update')
-			downloadUpdate(update)
-		} else {
-			console.log(`Metered connection detected, not auto-downloading update.`)
-			markAppUpdateActionable(update.version)
-			scheduleDelayedUpdatePopup()
-		}
-
-		getUpdateSize(update.rid).then((size) => (updateSize.value = size))
+	if (autoCheckEnabled.value) {
+		await performUpdateCheck().catch((e) => console.error('Failed to check for updates:', e))
 	}
-
-	await performCheck()
 	setTimeout(
 		() => {
 			checkUpdates()
@@ -1662,10 +1630,67 @@ async function checkUpdates() {
 	)
 }
 
+/** Runs one update check and records its outcome for the Updates settings tab. */
+async function performUpdateCheck() {
+	checkStatus.value = 'checking'
+	checkError.value = null
+	try {
+		await fetchAndQueueUpdate()
+		checkStatus.value = availableUpdate.value ? 'available' : 'up-to-date'
+	} catch (e) {
+		checkStatus.value = 'error'
+		checkError.value = e instanceof Error ? e.message : String(e)
+		throw e
+	} finally {
+		lastCheckedAt.value = Date.now()
+	}
+}
+
+async function checkUpdatesManually() {
+	if (!updatesEnabled.value || checkStatus.value === 'checking') return
+	await performUpdateCheck().catch((e) => console.error('Failed to check for updates:', e))
+}
+
+async function fetchAndQueueUpdate() {
+	const update = await invoke('plugin:updater|check')
+	if (!update) {
+		console.log('No update available')
+		return
+	}
+
+	const isExistingUpdate = update.version === availableUpdate.value?.version
+
+	if (isExistingUpdate) {
+		console.log('Update is already known')
+		scheduleDelayedUpdatePopup()
+		return
+	}
+
+	appUpdateDownload.progress.value = 0
+	finishedDownloading.value = false
+	downloading.value = false
+	updateSize.value = null
+	availableUpdate.value = update
+
+	console.log(`Update ${update.version} is available.`)
+
+	metered.value = await isNetworkMetered()
+	if (!metered.value) {
+		console.log('Starting download of update')
+		downloadUpdate(update)
+	} else {
+		console.log(`Metered connection detected, not auto-downloading update.`)
+		markAppUpdateActionable(update.version)
+		scheduleDelayedUpdatePopup()
+	}
+
+	getUpdateSize(update.rid).then((size) => (updateSize.value = size))
+}
+
 async function checkLinuxUpdates() {
 	try {
 		const [response, currentVersion] = await Promise.all([
-			fetch('https://launcher-files.modrinth.com/updates.json'),
+			fetch('https://github.com/krinix1337/mimikoLauncher/releases/latest/download/latest.json'),
 			getVersion(),
 		])
 		const updates = await response.json()
@@ -1752,9 +1777,10 @@ async function installUpdate() {
 }
 
 setAppUpdateActions({
+	check: checkUpdatesManually,
 	download: downloadAvailableUpdate,
 	install: installUpdate,
-	changelog: () => openUrl('https://modrinth.com/news/changelog?filter=app'),
+	changelog: () => openUrl('https://github.com/krinix1337/mimikoLauncher/releases'),
 })
 
 async function openModrinthProjectLinkInApp(parsed) {
