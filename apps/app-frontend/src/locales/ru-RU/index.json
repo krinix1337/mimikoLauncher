@@ -3110,6 +3110,9 @@
   "app.settings.tabs.troubleshooting": {
     "message": "Решение проблем"
   },
+  "app.settings.tabs.updates": {
+    "message": "Обновления"
+  },
   "app.settings.tabs.window": {
     "message": "Окно"
   },
@@ -3496,6 +3499,57 @@
   },
   "app.update.download-error.missing-version": {
     "message": "Не удалось загрузить обновление: нет доступных версий"
+  },
+  "app.updates-settings.auto-check.description": {
+    "message": "Искать новую версию при запуске и периодически во время работы и скачивать её в фоне."
+  },
+  "app.updates-settings.auto-check.title": {
+    "message": "Проверять обновления при запуске"
+  },
+  "app.updates-settings.changelog-button": {
+    "message": "Список изменений"
+  },
+  "app.updates-settings.check-button": {
+    "message": "Проверить обновления"
+  },
+  "app.updates-settings.current-version": {
+    "message": "Текущая версия: {version}"
+  },
+  "app.updates-settings.download-button": {
+    "message": "Скачать ({size})"
+  },
+  "app.updates-settings.downloaded": {
+    "message": "Обновление загружено и установится при перезапуске лаунчера."
+  },
+  "app.updates-settings.downloading": {
+    "message": "Загрузка обновления... {percent}%"
+  },
+  "app.updates-settings.install-button": {
+    "message": "Перезапустить и установить"
+  },
+  "app.updates-settings.last-checked": {
+    "message": "Последняя проверка: {time}"
+  },
+  "app.updates-settings.status.available": {
+    "message": "Доступна версия {version}."
+  },
+  "app.updates-settings.status.checking": {
+    "message": "Проверяем обновления..."
+  },
+  "app.updates-settings.status.disabled": {
+    "message": "Автообновление недоступно в этой сборке."
+  },
+  "app.updates-settings.status.error": {
+    "message": "Не удалось проверить обновления. Проверьте подключение к интернету и попробуйте снова."
+  },
+  "app.updates-settings.status.idle": {
+    "message": "Обновления ещё не проверялись."
+  },
+  "app.updates-settings.status.up-to-date": {
+    "message": "У вас последняя версия."
+  },
+  "app.updates-settings.title": {
+    "message": "Обновления"
   },
   "app.user.project.install-to-instance": {
     "message": "Установить в сборку"

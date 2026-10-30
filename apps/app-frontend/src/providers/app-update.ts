@@ -4,6 +4,8 @@ export const APP_UPDATE_POPUP_DELAY_MS = 24 * 60 * 60 * 1000
 
 const UPDATE_PROMPT_STORAGE_KEY = 'modrinth-app-update-prompt-state'
 
+const AUTO_CHECK_STORAGE_KEY = 'mimiko-auto-check-updates'
+
 export interface AppUpdate {
 	rid: number
 	version: string
@@ -20,7 +22,10 @@ interface UpdatePromptState {
 
 export type AppUpdatePromptStage = 'available' | 'downloaded'
 
+export type AppUpdateCheckStatus = 'idle' | 'checking' | 'up-to-date' | 'available' | 'error'
+
 interface AppUpdateActions {
+	check?: () => Promise<void> | void
 	download?: () => Promise<void> | void
 	install?: () => Promise<void> | void
 	changelog?: () => Promise<void> | void
@@ -34,6 +39,27 @@ const restarting = ref(false)
 const availableUpdate = ref<AppUpdate | null>(null)
 const updateSize = ref<number | null>(null)
 const updatesEnabled = ref(true)
+const checkStatus = ref<AppUpdateCheckStatus>('idle')
+const checkError = ref<string | null>(null)
+const lastCheckedAt = ref<number | null>(null)
+const autoCheckEnabled = ref(readAutoCheckEnabled())
+
+function readAutoCheckEnabled(): boolean {
+	try {
+		return localStorage.getItem(AUTO_CHECK_STORAGE_KEY) !== 'false'
+	} catch {
+		return true
+	}
+}
+
+export function setAppUpdateAutoCheck(enabled: boolean): void {
+	autoCheckEnabled.value = enabled
+	try {
+		localStorage.setItem(AUTO_CHECK_STORAGE_KEY, String(enabled))
+	} catch (error) {
+		console.warn('Failed to persist update auto-check preference:', error)
+	}
+}
 
 let actions: AppUpdateActions = {}
 
@@ -50,6 +76,10 @@ export const appUpdateState = {
 	availableUpdate,
 	updateSize,
 	updatesEnabled,
+	checkStatus,
+	checkError,
+	lastCheckedAt,
+	autoCheckEnabled,
 	downloadProgress: computed(() => progress.value),
 	downloadPercent: computed(() => Math.trunc(progress.value * 100)),
 	isVisible: computed(() => !!availableUpdate.value && !restarting.value && updatesEnabled.value),
@@ -153,6 +183,10 @@ export function getNextAppUpdatePopupTime(
 
 export function setAppUpdateActions(nextActions: AppUpdateActions): void {
 	actions = nextActions
+}
+
+export async function checkForAppUpdate(): Promise<void> {
+	await actions.check?.()
 }
 
 export async function downloadAvailableAppUpdate(): Promise<void> {

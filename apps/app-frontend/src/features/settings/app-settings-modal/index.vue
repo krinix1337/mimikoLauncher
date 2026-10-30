@@ -2,6 +2,7 @@
 import {
 	CodeIcon,
 	CoffeeIcon,
+	DownloadIcon,
 	GaugeIcon,
 	LanguagesIcon,
 	LightBulbIcon,
@@ -42,6 +43,7 @@ import type { InstanceDefaultsTab } from '@/features/settings/settings-actions'
 import SyncingSettings from '@/features/settings/syncing/syncing-settings.vue'
 import ResourceManagementSettings from '@/features/settings/system/resource-management-settings/index.vue'
 import TroubleshootingSettings from '@/features/settings/system/troubleshooting-settings.vue'
+import UpdatesSettings from '@/features/settings/system/updates-settings.vue'
 import { appSettingsKeys, appSettingsQueryOptions, set } from '@/helpers/settings.ts'
 import { injectAppUpdateDownloadProgress } from '@/providers/download-progress.ts'
 
@@ -165,6 +167,15 @@ const tabs = [
 		category: tabCategories.system,
 		icon: GaugeIcon,
 		content: ResourceManagementSettings,
+	},
+	{
+		name: defineMessage({
+			id: 'app.settings.tabs.updates',
+			defaultMessage: 'Updates',
+		}),
+		category: tabCategories.system,
+		icon: DownloadIcon,
+		content: UpdatesSettings,
 	},
 	{
 		name: defineMessage({

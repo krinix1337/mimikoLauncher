@@ -3131,6 +3131,9 @@
   "app.settings.tabs.troubleshooting": {
     "message": "Troubleshooting"
   },
+  "app.settings.tabs.updates": {
+    "message": "Updates"
+  },
   "app.settings.tabs.window": {
     "message": "Window"
   },
@@ -3517,6 +3520,57 @@
   },
   "app.update.download-error.missing-version": {
     "message": "Failed to download update: no version available"
+  },
+  "app.updates-settings.auto-check.description": {
+    "message": "Look for a new version when the app starts and periodically while it runs, and download it in the background."
+  },
+  "app.updates-settings.auto-check.title": {
+    "message": "Check for updates on startup"
+  },
+  "app.updates-settings.changelog-button": {
+    "message": "Release notes"
+  },
+  "app.updates-settings.check-button": {
+    "message": "Check for updates"
+  },
+  "app.updates-settings.current-version": {
+    "message": "Current version: {version}"
+  },
+  "app.updates-settings.download-button": {
+    "message": "Download ({size})"
+  },
+  "app.updates-settings.downloaded": {
+    "message": "The update is downloaded and will be installed when you restart the app."
+  },
+  "app.updates-settings.downloading": {
+    "message": "Downloading update... {percent}%"
+  },
+  "app.updates-settings.install-button": {
+    "message": "Restart and install"
+  },
+  "app.updates-settings.last-checked": {
+    "message": "Last checked: {time}"
+  },
+  "app.updates-settings.status.available": {
+    "message": "Version {version} is available."
+  },
+  "app.updates-settings.status.checking": {
+    "message": "Checking for updates..."
+  },
+  "app.updates-settings.status.disabled": {
+    "message": "Automatic updates are not available in this build."
+  },
+  "app.updates-settings.status.error": {
+    "message": "Could not check for updates. Check your internet connection and try again."
+  },
+  "app.updates-settings.status.idle": {
+    "message": "Updates have not been checked yet."
+  },
+  "app.updates-settings.status.up-to-date": {
+    "message": "You are using the latest version."
+  },
+  "app.updates-settings.title": {
+    "message": "Updates"
   },
   "app.user.project.install-to-instance": {
     "message": "Install to instance"

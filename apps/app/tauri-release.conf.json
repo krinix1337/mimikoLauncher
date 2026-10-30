@@ -1,24 +1,6 @@
 {
 	"bundle": {
-		"createUpdaterArtifacts": "v1Compatible",
-		"windows": {
-			"signCommand": {
-				"cmd": "jsign",
-				"args": [
-					"sign",
-					"--verbose",
-					"--storetype",
-					"DIGICERTONE",
-					"--keystore",
-					"https://clientauth.one.digicert.com",
-					"--storepass",
-					"env:DIGICERT_ONE_SIGNER_CREDENTIALS",
-					"--tsaurl",
-					"https://timestamp.sectigo.com,http://timestamp.digicert.com",
-					"%1"
-				]
-			}
-		}
+		"createUpdaterArtifacts": true
 	},
 	"build": {
 		"features": ["updater"]
@@ -30,8 +12,10 @@
 	},
 	"plugins": {
 		"updater": {
-			"pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDIwMzM5QkE0M0FCOERBMzkKUldRNTJyZzZwSnN6SUdPRGdZREtUUGxMblZqeG9OVHYxRUlRTzJBc2U3MUNJaDMvZDQ1UytZZmYK",
-			"endpoints": ["https://launcher-files.modrinth.com/updates.json"],
+			"pubkey": "REPLACE_WITH_TAURI_UPDATER_PUBKEY",
+			"endpoints": [
+				"https://github.com/krinix1337/mimikoLauncher/releases/latest/download/latest.json"
+			],
 			"windows": {
 				"installMode": "quiet"
 			}
