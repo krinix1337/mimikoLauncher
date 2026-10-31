@@ -1468,6 +1468,7 @@ const {
 	autoCheckEnabled,
 } = appUpdateState
 let delayedUpdatePopupTimeout = null
+let installWhenDownloaded = false
 
 const updatePopupMessages = defineMessages({
 	updateAvailable: {
@@ -1715,7 +1716,10 @@ async function checkLinuxUpdates() {
 	}
 }
 
+/** Downloads the update the user asked for and restarts into it as soon as it is ready. */
 async function downloadAvailableUpdate() {
+	installWhenDownloaded = true
+	if (finishedDownloading.value) return installUpdate()
 	return downloadUpdate(availableUpdate.value)
 }
 
@@ -1742,10 +1746,15 @@ async function downloadUpdate(versionToDownload) {
 				unlistenUpdateDownload = null
 				console.log('Finished downloading!')
 				markAppUpdateActionable(versionToDownload.version, 'downloaded')
+				if (installWhenDownloaded) {
+					installUpdate()
+					return
+				}
 				scheduleDelayedUpdatePopup()
 			})
 			.catch((e) => {
 				downloading.value = false
+				installWhenDownloaded = false
 				appUpdateDownload.progress.value = 0
 				handleError(e)
 			})

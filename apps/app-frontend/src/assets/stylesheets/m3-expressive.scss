@@ -111,6 +111,11 @@
 		}
 	}
 
+	/* Notification buttons close the popup on click, so the pressed morph only reads as a glitch there. */
+	.popup-notification-group [data-button]:active {
+		border-radius: 9999px !important;
+	}
+
 	.button-frame--base,
 	.button-frame--colored-text {
 		background-color: var(--md-secondary-container) !important;
